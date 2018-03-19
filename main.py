@@ -3,6 +3,8 @@ import logging
 from flask import Flask
 from flask_ask import Ask, statement, question, session
 
+from game import game
+
 
 app = Flask(__name__)
 ask = Ask(app, '/python_quiz')
@@ -23,25 +25,30 @@ def new_session():
 
 @ask.intent('AMAZON.YesIntent')
 def start_quiz():
-    QUIZ = QuizGame()
-    return question(QUIZ.next_question())
+    global QUIZ
+    QUIZ = game.QuizGame(num_questions=4)
+    return question(QUIZ.current_question().ask())
 
 
 @ask.intent('QuizAnswerIntent')
-def answer(answer):
-
-    if QUIZ.has_ended:
+def answer(guess):
+    logger.info('Quiz game: %s', QUIZ)
+    if QUIZ.is_complete():
         # statements end the loop between the user and the device
         statement('The quiz has ended! You got {number_correct} out of {total}'.format(number_correct=QUIZ.number_correct, total=QUIZ.total_questions))
 
-    question = QUIZ.next_question()
-    if answer == QUIZ.current_answer:
-        next_question = 'Correct! Next question: {question}'.format(question=question)
-        # questions expect a response and keep the loop between the device and the user alive
-        return question(next_question)
+    is_answer_correct = QUIZ.answer(guess)
+    response = '{response_message} {next_question}'
+    if is_answer_correct:
+        correct_response = 'Correct! Next question:'
+        response = response.format(response=correct_response,
+                                   next_question=QUIZ.current_question().ask())
+        return question(response)
 
-    next_question = 'Incorect...next question: {question}'.format(question=question)
-    return question(next_question)
+    incorrect_response = 'Incorrect...next question:'
+    response = response.format(response_message=incorrect_response,
+                               next_question=QUIZ.current_question().ask())
+    return question(response)
 
 
 @ask.intent('AMAZON.StopIntent')
