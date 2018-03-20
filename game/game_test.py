@@ -48,7 +48,7 @@ class QuestionTests(unittest.TestCase):
     def test_ask_question(self):
         posed_question = 'what is your favorite color?'
         choices = ('red', 'blue', 'purple', 'yellow')
-        quiz_question = game.Question(posed_question, *choices, 'blue')
+        quiz_question = game.Question(posed_question, *choices, answer='blue')
         ask = quiz_question.ask()
         self.assertIn(posed_question, ask)
         for choice in choices:
