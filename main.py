@@ -26,16 +26,19 @@ def new_session():
 @ask.intent('AMAZON.YesIntent')
 def start_quiz():
     global QUIZ
-    QUIZ = game.QuizGame(num_questions=4)
+    QUIZ = game.QuizGame(num_questions=1)
     return question(QUIZ.current_question().ask())
 
 
 @ask.intent('QuizAnswerIntent')
 def answer(guess):
+    return _answer_question(guess)
+
+def _answer_question(guess):
     logger.info('Quiz game: %s', QUIZ)
     if QUIZ.is_complete():
         # statements end the loop between the user and the device
-        statement('The quiz has ended! You got {number_correct} out of {total}'.format(number_correct=QUIZ.number_correct, total=QUIZ.total_questions))
+        return statement('The quiz has ended! You got {number_correct} out of {total}'.format(number_correct=QUIZ.number_correct, total=QUIZ.total_questions))
 
     is_answer_correct = QUIZ.answer(guess)
     response = '{response_message} {next_question}'
@@ -44,6 +47,11 @@ def answer(guess):
         response = response.format(response=correct_response,
                                    next_question=QUIZ.current_question().ask())
         return question(response)
+
+    # answering points to a new question - we may be at the end
+    if not QUIZ.current_question():
+        # statements end the loop between the user and the device
+        return statement('The quiz has ended! You got {number_correct} out of {total}'.format(number_correct=QUIZ.number_correct, total=QUIZ.total_questions))
 
     incorrect_response = 'Incorrect...next question:'
     response = response.format(response_message=incorrect_response,

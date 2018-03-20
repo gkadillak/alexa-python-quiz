@@ -22,6 +22,11 @@ class QuizGame:
             return self.questions[-1]
         return None
 
+    def next_question(self):
+        if len(self.questions) >= 2:
+            return self.questions[-2]
+        return None
+
     def answer(self, guess):
         is_correct = self.current_question().answer(guess)
         if is_correct:
