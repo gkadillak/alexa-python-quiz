@@ -63,4 +63,4 @@ def _answer_question(guess):
 
 @ask.intent('AMAZON.StopIntent')
 def stop_quiz():
-    return statement('Goodbye!')
+    return statement('Thanks for playing Python Quiz. Goodbye!')
