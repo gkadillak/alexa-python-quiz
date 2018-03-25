@@ -26,3 +26,5 @@ what keyword do you use to define a function, def, func, function, routine, 1
 what is the first statement in a function body called, special comment, passive comment, docstring, information comment, 3
 what does the execution of a function introduce, another thread, a new global symbol table, a new local symbol table, a persistent memory access, 3
 how are arguments passed, call by value, call by reference, implicitly, explicitly, but stored in the global symbol table, 1
+how many times is the default value for a function keyword argument, never, once, twice, three times, 2
+what container is used to store the keyword arguments of a function, list, tuple, dictionary, named tuple, 3

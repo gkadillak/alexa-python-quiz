@@ -1,7 +1,10 @@
 import logging
+import os
 
 from flask import Flask
 from flask_ask import Ask, statement, question, session
+
+import config
 
 from game import game
 
@@ -9,7 +12,12 @@ from game import game
 app = Flask(__name__)
 ask = Ask(app, '/python_quiz')
 
+
 logger = logging.getLogger(__name__)
+flask_logger = logging.getLogger('flask_ask')
+is_debug = bool(int(os.environ.get('FLASK_DEBUG')))
+
+config.set_log_level(flask_logger, is_debug=is_debug)
 
 QUIZ = None
 
@@ -39,6 +47,7 @@ def _ask_first_question():
 @ask.intent('QuizAnswerIntent', mapping={'guess': 'Answer'})
 def answer(guess):
     return _answer_question(guess)
+
 
 def _answer_question(guess):
     logger.info('Quiz game: %s', QUIZ)
