@@ -2,6 +2,7 @@ import unittest
 
 from . import game
 
+
 class GameTests(unittest.TestCase):
 
     def test_questions_collection(self):

@@ -1,23 +1,11 @@
 import logging
-import os
 
-from flask import Flask
-from flask_ask import Ask, statement, question, session
+from flask_ask import question, statement
+from python_quiz.game import game
 
-import config
-
-from game import game
-
-
-app = Flask(__name__)
-ask = Ask(app, '/python_quiz')
-
+from python_quiz.app import ask, flask_app
 
 logger = logging.getLogger(__name__)
-flask_logger = logging.getLogger('flask_ask')
-is_debug = bool(int(os.environ.get('FLASK_DEBUG')))
-
-config.set_log_level(flask_logger, is_debug=is_debug)
 
 QUIZ = None
 
@@ -35,13 +23,18 @@ def new_session():
 
 @ask.intent('AMAZON.YesIntent')
 def start_quiz():
-    return _ask_first_question()
+    quiz = _start_quiz()
+    first_question = quiz.current_question.ask()
+    return question(first_question)
 
+def _start_quiz():
+    quiz = None
+    if flask_app.config.DEBUG:
+        quiz = game.QuizGame(num_questions=1)
+    else:
+        quiz = game.QuizGame(num_questions=5)
 
-def _ask_first_question():
-    global QUIZ
-    QUIZ = game.QuizGame(num_questions=2)
-    return question(QUIZ.current_question().ask())
+    return quiz
 
 
 @ask.intent('QuizAnswerIntent', mapping={'guess': 'Answer'})
@@ -51,6 +44,7 @@ def answer(guess):
 
 def _answer_question(guess):
     logger.info('Quiz game: %s', QUIZ)
+
     if QUIZ.is_complete():
         # statements end the loop between the user and the device
         return statement('The quiz has ended! You got {number_correct} out of {total}'.format(number_correct=QUIZ.number_correct, total=QUIZ.total_questions))

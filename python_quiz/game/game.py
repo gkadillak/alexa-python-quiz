@@ -1,5 +1,7 @@
 import csv
-import collections
+import json
+
+from python_quiz.game.models.question import Question
 
 
 class QuizGame:
@@ -17,11 +19,13 @@ class QuizGame:
     def _create_questions(self, num_questions):
         return QuestionsCollection(num_questions=num_questions)
 
+    @property
     def current_question(self):
         if self.questions:
             return self.questions[-1]
         return None
 
+    @property
     def next_question(self):
         if len(self.questions) >= 2:
             return self.questions[-2]
@@ -33,6 +37,12 @@ class QuizGame:
             self.number_correct += 1
         self.questions.pop()
         return is_correct
+
+    def to_json(self):
+        response = dict(current_question=self.current_question,
+                        next_question=self.next_question,
+                        correct_answer=self.current_question.correct_answer)
+        return json.dumps(response)
 
     def is_complete(self):
         return not bool(len(self.questions))
@@ -84,33 +94,3 @@ class QuestionsCollection:
         return '<Quiz {question} {current_question_number}/{num_questions}>'.format(question=self.questions[0],
                                                                                     current_question_number=len(self.questions),
                                                                                     num_questions=self.num_questions)
-
-
-class Question:
-
-    def __init__(self, question, choice_one, choice_two, choice_three, choice_four, answer):
-        self.question = question
-        self.choice_one = choice_one
-        self.choice_two = choice_two
-        self.choice_three = choice_three
-        self.choice_four = choice_four
-        self.correct_answer = answer
-
-    def answer(self, guess):
-        return self.correct_answer == guess
-
-    def ask(self):
-        return """
-        {question}? Is it one: {choice_one}, two: {choice_two},
-        three: {choice_three}, or four: {choice_four}?
-        """.format(question=self.question,
-                   choice_one=self.choice_one,
-                   choice_two=self.choice_two,
-                   choice_three=self.choice_three,
-                   choice_four=self.choice_four)
-
-    def __str__(self):
-        return self.question
-
-    def __repr__(self):
-        return self.question
