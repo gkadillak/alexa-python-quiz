@@ -2,7 +2,7 @@ which of the following is true for an iterable, all python objects can be an ite
 what are generator expressions surrounded by,parentheses,brackets,curly braces,it depends,1
 what is the recommended tool for using virtual environments as of python three dot five,pyvenv,virtualenv,no change,venv,4
 how do you access the script name and additional arguments,use star args,import sys and use sys.argv,they are accessible on the global scope with just argv,they are not accessible,2
-when no script and no arguments are given, what is the value of sys argv of zero, empty string, empty list, empty dictionary, zero, 1
+when no script and no arguments are given what is the value of sys argv of zero, empty string, empty list, empty dictionary, zero, 1
 what does tty short for, time to yell, ternary test yield, teletype, it is not an abbreviation, 3
 what is a tty, terminal, testing procedure, kind of python class, monitor, 1
 how do you invoke interactive mode with python, type python interactive in a terminal and press enter,write a bash script,you cannot run python in an interactive mode,type python three in a terminal and press enter, 3
@@ -25,6 +25,6 @@ what does the pass statement do, passes execution to the secondary thread, passe
 what keyword do you use to define a function, def, func, function, routine, 1
 what is the first statement in a function body called, special comment, passive comment, docstring, information comment, 3
 what does the execution of a function introduce, another thread, a new global symbol table, a new local symbol table, a persistent memory access, 3
-how are arguments passed, call by value, call by reference, implicitly, explicitly, but stored in the global symbol table, 1
+how are arguments passed, call by value, call by reference, implicitly, explicitly but stored in the global symbol table, 1
 how many times is the default value for a function keyword argument, never, once, twice, three times, 2
 what container is used to store the keyword arguments of a function, list, tuple, dictionary, named tuple, 3
