@@ -1,0 +1,4 @@
+ask_question: |
+  <speak>
+    {{ question }}? Is it one, {{ option_one }}, two {{ option_two }}, three {{ option_three }} or four {{ option_four }}?
+  </speak>

@@ -6,7 +6,7 @@ from . import game
 class GameTests(unittest.TestCase):
 
     def test_questions_collection(self):
-        question_collection = game.QuestionsCollection(num_questions=2)
+        question_collection = game.GameInterface(num_questions=2)
         self.assertEqual(len(question_collection), 2)
 
 
@@ -14,7 +14,7 @@ class QuizGameTests(unittest.TestCase):
 
     def test_correct_answer(self):
         quiz_game = game.QuizGame(num_questions=1)
-        is_correct = quiz_game.answer(quiz_game.questions[0].correct_answer)
+        is_correct = quiz_game.answer(quiz_game.game[0].correct_answer)
 
         self.assertTrue(is_correct)
         self.assertEqual(quiz_game.number_correct, 1)
