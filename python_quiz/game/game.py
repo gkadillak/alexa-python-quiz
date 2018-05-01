@@ -1,14 +1,15 @@
-import json
-
 from sqlalchemy import func
 from flask import render_template
 
 from python_quiz.game import models
+from python_quiz.game.constants import game_pb
 from python_quiz.tools import sessions
 
 
-def ask_current_question(session_id):
+def ask_current_question(session_id, account_id):
+  user = get_or_create_user(account_id)
   session = sessions.create_session()
+  # what if a user has multiple games with the same session id? order by ascending and pick the first one
   game = session.query(models.Game).filter(models.Game.session_id==session_id).first()
   current_question = session.query(models.Question).get(game.question_ids.pop())
   session.add(game)
@@ -20,35 +21,50 @@ def ask_current_question(session_id):
                   option_three=current_question.option_three,
                   option_four=current_question.option_four)
 
+def get_or_create_user(user_id):
+  session = sessions.create_session()
+  user = models.User.query.get(user_id)
+  if user:
+    session.close()
+    return user
 
-class QuizGame:
+  user = models.User(account_id=user_id)
+  session.add(user)
+  session.commit()
+  session.close()
+  return user
 
-  def __init__(self, num_questions, session_id):
-    self.game = self._create_quiz(num_questions=num_questions, session_id=session_id)
+def respond_game_summary(session_id):
+  session = sessions.create_session()
+  game = session.query(models.Game).filter(models.Game.session_id == session_id).first()
+  session.close()
+  return render_template('end_game', number_correct=game.count_correct, total=game.count)
 
-  def _create_quiz(self, num_questions, session_id):
-    return GameInterface(num_questions=num_questions, session_id=session_id)
+def respond_to_guess(session_id, guess):
+  is_correct = answer_current_question(session_id, guess)
+  is_last_question = has_next_question(session_id)
 
-  def next_question(self):
-    return self.game.next_question()
+  # if the answer is correct, tell the user, and there is a next question, ask it!
+  if is_correct and not is_last_question:
+    correct_answer_response = render_template('correct_with_next_question')
+    next_question_response = ask_current_question(session_id)
+    return correct_answer_response + next_question_response, game_pb.ResponseType.QUESTION
 
-  @property
-  def current_question(self):
-    return self.game.current_question
+  # if the answer is correct and there is no next question, return the game summary
+  elif is_correct and is_last_question:
+    return render_template('correct_with_no_next_question'), game_pb.ResponseType.STATEMENT
 
-  def answer(self, guess, session_id):
-    return self.game.answer_current_question(guess)
+  # if the answer is incorrect, and there is a next question, ask it!
+  elif not is_correct and not is_last_question:
+    incorrect_answer_response = render_template('incorrect_with_next_question')
+    next_question_response = ask_current_question(session_id)
+    return incorrect_answer_response + next_question_response, game_pb.ResponseType.QUESTION
 
-  def to_json(self):
-    response = dict(current_question=self.current_question,
-                    next_question=self.next_question,
-                    correct_answer=self.current_question.correct_answer)
-    return json.dumps(response)
+  # if the answer is incorrect, and there is no next question, return the game summary
+  elif not is_correct and is_last_question:
+    return render_template('incorrect_with_no_next_question'), game_pb.ResponseType.STATEMENT
 
-  def is_complete(self):
-    return self.game.is_complete()
-
-def create_game(num_questions, session_id):
+def create_game(num_questions, session_id, user_id):
   """
   Instantiate a game and persist it to the database
 
@@ -58,82 +74,25 @@ def create_game(num_questions, session_id):
   @param session_id: The external identifier of the session
   @type session_id: str
 
+  @param user_id: The identifier of the user, as defined by Amazon
+  @type user_id: str
+
   @return: Game
   @rtype: python_quiz.game.models.Game
   """
   session = sessions.create_session()
+  user = get_or_create_user(user_id)
   ids = session.query(models.Question.id).order_by(func.random()).limit(num_questions).all()
-  game = models.Game(count=num_questions, question_ids=ids, question_ids_snapshot=ids, session_id=session_id)
+  game = models.Game(count=num_questions, question_ids=ids, question_ids_snapshot=ids, session_id=session_id, user_id=user.id)
   session.add(game)
   session.commit()
   session.close()
   return game
 
-class GameInterface:
-
-  def __init__(self, num_questions, session_id):
-    self.game = self.create_game(num_questions, session_id=session_id)
-
-
-  def next_question(self):
-    """
-    Return the next question from the list of question id's and save
-    the current state of the game. Mutates the game state.
-
-    @return: The next question
-    @rtype: python_quiz.game.models.Question
-    """
-    session = sessions.create_session()
-    question_id = self.game.question_ids.pop()
-    session.add(self.game)
-    session.commit()
-    session.close()
-    return models.Question.query.get(question_id)
-
-  @property
-  def current_question(self):
-    """
-    The next unanswered question. Does not mutate the game state.
-
-    @return: The next unanswered question
-    @rtype: python_quiz.game.models.Question
-    """
-    session = sessions.create_session()
-    question_id = self.game.question_ids[-1]
-    question = session.query(models.Question).get(question_id)
-    session.close()
-    return question
-
-  def __len__(self):
-    return len(self.game.count)
-
-  def __iter__(self):
-    return [models.Question.query.get(i) for i in self.game.question_ids]
-
-  def __getitem__(self, key):
-    return models.Question.query.get(key)
-
-  def answer_current_question(self, guess, session_id):
-    """Answer the current question and update the game totals of correct/incorrect"""
-    session = sessions.create_session()
-    is_correct = self.current_question.answer == int(guess)
-
-    if is_correct:
-      self.game.count_correct +=1
-    else:
-      self.game.count_incorrect += 1
-    session.add(self.game)
-    session.commit()
-    session.close()
-    return is_correct()
-
-  def is_complete(self):
-    return len(self.game.question_ids)
-
-def answer_current_question(guess, session_id):
+def answer_current_question(session_id, guess):
   """Answer the current question based on the session_id"""
   session = sessions.create_session()
-  game = models.Game.query.get(session_id)
+  game = session.query(models.Game).filter(models.Game.session_id == session_id).first()
   question_id = game.question_ids.pop()
   current_question = models.Question.query.get(question_id)
   is_correct = current_question.answer == int(guess)
@@ -146,4 +105,10 @@ def answer_current_question(guess, session_id):
   session.commit()
   session.close()
   return is_correct
+
+def has_next_question(session_id):
+  session = sessions.create_session()
+  game = session.query(models.Game).filter(models.Game.session_id == session_id).first()
+  session.close()
+  return len(game.question_ids) != 0
 
