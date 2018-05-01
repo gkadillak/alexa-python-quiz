@@ -1,6 +1,6 @@
 import csv
 
-from python_quiz.game.models import question
+from python_quiz.game import models
 from python_quiz.tools import sessions
 
 
@@ -15,8 +15,8 @@ def load_data():
     for row in csvfile:
       quest = None
       try:
-        quest = question.Question(body=row[0], option_one=row[1].strip(), option_two=row[2].strip(),
-                              option_three=row[3].strip(), option_four=row[4].strip(), answer=int(row[5]))
+        quest = models.Question(body=row[0], option_one=row[1].strip(), option_two=row[2].strip(),
+                                option_three=row[3].strip(), option_four=row[4].strip(), answer=int(row[5]))
       except Exception as e:
         # Print what went wrong and inspect
         print(e)

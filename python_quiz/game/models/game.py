@@ -33,6 +33,8 @@ class Game(base.BaseModel):
   session_id = db.Column(db.String(), nullable=False)
   """The identifier as given by external party"""
 
+  user_id = db.Column(db.String, db.ForeignKey('users.id'))
+
   __mapper_args__ = {
     'polymorphic_identity': 'games',
     'concrete': True
