@@ -15,7 +15,7 @@ correct_with_next_question: |
 
 correct_with_no_next_question: |
   <speak>
-    Correct! That was the last question. The summary of the game goes here.
+    Correct! That was the last question. You've answered {{ count_correct }} out of {{ count_total }}.
   </speak>
 
 incorrect_answer_with_next_question: |
@@ -25,6 +25,7 @@ incorrect_answer_with_next_question: |
 
 incorrect_with_no_next_question: |
   <speak>
-    I'm sorry, that's incorrect. That was the last question. The summary of the game goes here.
+    I'm sorry, that's incorrect. That was the last question.
+    You've answered {{ count_correct }} out of {{ count_total }}.
   </speak>
 

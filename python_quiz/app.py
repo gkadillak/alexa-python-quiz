@@ -2,7 +2,7 @@ import logging
 import os
 
 from flask import Flask
-from flask_ask import Ask, question
+from flask_ask import Ask
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 
