@@ -15,18 +15,13 @@ def start_skill():
   return question(welcome_message)
 
 
-@flask_app.route('/word')
-def word():
-  return 'word'
-
-
 @ask.intent('AMAZON.YesIntent')
 def start_quiz():
   session_id = session.get('sessionId')
   user_id = session['user']['userId']
   game.create_game(num_questions=1, session_id=session_id, user_id=user_id)
   first_question = game.ask_current_question(session_id, user_id)
-  return question(first_question)
+  return question(first_question).simple_card(title="What is python?", content="1. Something\n2. Else\n3. Entirely")
 
 
 @ask.intent('QuizAnswerIntent', mapping={'guess': 'Answer'})

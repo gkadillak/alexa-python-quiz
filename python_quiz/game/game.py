@@ -44,6 +44,10 @@ def respond_to_guess(session_id, guess):
   is_correct = answer_current_question(session_id, guess)
   is_last_question = has_next_question(session_id)
 
+  session = sessions.create_session()
+  game = session.query(models.Game).filter(models.Game.session_id == session_id).first()
+  session.close()
+
   # if the answer is correct, tell the user, and there is a next question, ask it!
   if is_correct and not is_last_question:
     correct_answer_response = render_template('correct_with_next_question')
@@ -52,7 +56,7 @@ def respond_to_guess(session_id, guess):
 
   # if the answer is correct and there is no next question, return the game summary
   elif is_correct and is_last_question:
-    return render_template('correct_with_no_next_question'), game_pb.ResponseType.STATEMENT
+    return render_template('correct_with_no_next_question', count_correct=game.count_correct, count_total=game.count), game_pb.ResponseType.STATEMENT
 
   # if the answer is incorrect, and there is a next question, ask it!
   elif not is_correct and not is_last_question:
@@ -62,7 +66,7 @@ def respond_to_guess(session_id, guess):
 
   # if the answer is incorrect, and there is no next question, return the game summary
   elif not is_correct and is_last_question:
-    return render_template('incorrect_with_no_next_question'), game_pb.ResponseType.STATEMENT
+    return render_template('incorrect_with_no_next_question', count_correct=game.count_correct, count_total=game.count), game_pb.ResponseType.STATEMENT
 
 def create_game(num_questions, session_id, user_id):
   """
@@ -90,7 +94,17 @@ def create_game(num_questions, session_id, user_id):
   return game
 
 def answer_current_question(session_id, guess):
-  """Answer the current question based on the session_id"""
+  """
+  Answer the current question based on the current session
+
+  @param session_id: The identifier for the current session
+  @type session_id: str
+
+  @param guess: The user's guess for the number they believe is correct: ('1', '2', '3', '4')
+  @type guess: str
+
+  @rtype: True if the guess is correct
+  """
   session = sessions.create_session()
   game = session.query(models.Game).filter(models.Game.session_id == session_id).first()
   question_id = game.question_ids.pop()
@@ -107,6 +121,7 @@ def answer_current_question(session_id, guess):
   return is_correct
 
 def has_next_question(session_id):
+  """Whether there is still a question that has not been asked yet"""
   session = sessions.create_session()
   game = session.query(models.Game).filter(models.Game.session_id == session_id).first()
   session.close()
