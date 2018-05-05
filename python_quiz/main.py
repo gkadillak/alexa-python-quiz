@@ -1,9 +1,9 @@
-from python_quiz.app import ask, flask_app
-
 import logging
 
-from flask_ask import question, statement, session
-from python_quiz.game import game, constants
+from flask_ask import question, session, statement
+
+from python_quiz.app import ask
+from python_quiz.game import constants, game
 from python_quiz.game.constants import game_pb
 
 logger = logging.getLogger(__name__)
@@ -20,8 +20,9 @@ def start_quiz():
   session_id = session.get('sessionId')
   user_id = session['user']['userId']
   game.create_game(num_questions=1, session_id=session_id, user_id=user_id)
-  first_question = game.ask_current_question(session_id, user_id)
-  return question(first_question).simple_card(title="What is python?", content="1. Something\n2. Else\n3. Entirely")
+  rendered_question, question_instance = game.ask_current_question(session_id, user_id)
+  title, content = game.display_card(question_instance)
+  return question(rendered_question).simple_card(title=title, content=content)
 
 
 @ask.intent('QuizAnswerIntent', mapping={'guess': 'Answer'})

@@ -1,3 +1,5 @@
+from textwrap import wrap
+
 from sqlalchemy import func
 from flask import render_template
 
@@ -15,11 +17,20 @@ def ask_current_question(session_id, account_id):
   session.add(game)
   session.commit()
   return render_template('ask_question',
-                  question=current_question.body,
-                  option_one=current_question.option_one,
-                  option_two=current_question.option_two,
-                  option_three=current_question.option_three,
-                  option_four=current_question.option_four)
+                         question=current_question.body,
+                         option_one=current_question.option_one,
+                         option_two=current_question.option_two,
+                         option_three=current_question.option_three,
+                         option_four=current_question.option_four), current_question
+
+def display_card(question):
+  title = '\n'.join(wrap(question.body, width=7)) + '?'
+  content = '1. {option_one}\n2.{option_two}\n3.{option_three}\n4.{option_four}'.format(option_one=question.option_one,
+                                                                                        option_two=question.option_two,
+                                                                                        option_three=question.option_three,
+                                                                                        option_four=question.option_four)
+  return title, content
+
 
 def get_or_create_user(user_id):
   session = sessions.create_session()
