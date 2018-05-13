@@ -4,6 +4,7 @@ __pycache__/
 venv/
 .cache/
 .pytest_cache/
+.idea/
 bin/
 config.py
 lib/

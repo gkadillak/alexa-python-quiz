@@ -1,13 +1,13 @@
 from datetime import datetime
 
-from python_quiz.app import db
+from python_quiz import app
 
 
-class BaseModel(db.Model):
+class BaseModel(app.db.Model):
 
   __abstract__ = True
 
-  created = db.Column(db.DateTime, default=datetime.utcnow())
+  created = app.db.Column(app.db.DateTime, default=datetime.utcnow())
 
   # TODO: event for updating this value
-  updated = db.Column(db.DateTime, default=datetime.utcnow())
+  updated = app.db.Column(app.db.DateTime, default=datetime.utcnow())

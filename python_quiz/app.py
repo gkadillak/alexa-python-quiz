@@ -10,14 +10,10 @@ from . import config
 
 flask_app = Flask(__name__)
 flask_app.config.from_object(os.environ['APP_SETTINGS'])
-db = SQLAlchemy(flask_app)
+db = SQLAlchemy(app=flask_app)
 
 ask = Ask(app=flask_app, route='/python_quiz')
 configs = config
-
-@flask_app.route('/home')
-def home():
-  return 'home'
 
 # models need to be imported to track migration changes
 try:
@@ -32,5 +28,3 @@ logger = logging.getLogger(__name__)
 flask_ask_logger = logging.getLogger('flask_ask')
 
 from . import main
-
-

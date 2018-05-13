@@ -1,6 +1,6 @@
 from sqlalchemy.dialects import postgresql
 
-from python_quiz.app import db
+from python_quiz import app
 from python_quiz.game.models import base
 
 
@@ -13,27 +13,27 @@ class Game(base.BaseModel):
 
   __tablename__ = 'games'
 
-  id = db.Column(db.Integer, primary_key=True)
+  id = app.db.Column(app.db.Integer, primary_key=True)
 
-  count = db.Column(db.Integer)
+  count = app.db.Column(app.db.Integer)
   """The number of questions for the quiz"""
 
-  count_correct = db.Column(db.Integer, default=0)
+  count_correct = app.db.Column(app.db.Integer, default=0)
   """The number of questions answered correctly"""
 
-  count_incorrect = db.Column(db.Integer, default=0)
+  count_incorrect = app.db.Column(app.db.Integer, default=0)
   """The number of questions answered incorrectly"""
 
-  question_ids_snapshot = db.Column(postgresql.ARRAY(db.Integer), nullable=False)
+  question_ids_snapshot = app.db.Column(postgresql.ARRAY(app.db.Integer), nullable=False)
   """Represents the quiz as instantiated"""
 
-  question_ids = db.Column(postgresql.ARRAY(db.Integer))
+  question_ids = app.db.Column(postgresql.ARRAY(app.db.Integer))
   """The current state of the game"""
 
-  session_id = db.Column(db.String(), nullable=False)
+  session_id = app.db.Column(app.db.String(), nullable=False)
   """The identifier as given by external party"""
 
-  user_id = db.Column(db.String, db.ForeignKey('users.id'))
+  user_id = app.db.Column(app.db.String, app.db.ForeignKey('users.id'))
 
   __mapper_args__ = {
     'polymorphic_identity': 'games',

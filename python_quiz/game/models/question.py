@@ -1,4 +1,4 @@
-from python_quiz.app import db
+from python_quiz import app
 from python_quiz.game.models import base
 
 
@@ -6,24 +6,24 @@ class Question(base.BaseModel):
 
     __tablename__ = 'questions'
 
-    id = db.Column(db.Integer, primary_key=True)
+    id = app.db.Column(app.db.Integer, primary_key=True)
 
-    body = db.Column(db.String, nullable=False)
+    body = app.db.Column(app.db.String, nullable=False)
     """The question iteself"""
 
-    option_one = db.Column(db.String, nullable=True)
+    option_one = app.db.Column(app.db.String, nullable=True)
     """The first option for the question"""
 
-    option_two = db.Column(db.String, nullable=True)
+    option_two = app.db.Column(app.db.String, nullable=True)
     """The second option for the question"""
 
-    option_three = db.Column(db.String, nullable=True)
+    option_three = app.db.Column(app.db.String, nullable=True)
     """The third option for the question"""
 
-    option_four = db.Column(db.String, nullable=True)
+    option_four = app.db.Column(app.db.String, nullable=True)
     """The fourth option for the question"""
 
-    answer = db.Column(db.Integer, nullable=False)
+    answer = app.db.Column(app.db.Integer, nullable=False)
     """The answer for the question"""
 
     __mapper_args = {
