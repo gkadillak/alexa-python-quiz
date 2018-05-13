@@ -9,7 +9,7 @@ from python_quiz.tools import sessions
 
 
 def ask_current_question(session_id, account_id):
-  user = get_or_create_user(account_id)
+  get_or_create_user(account_id)
   session = sessions.create_session()
   # what if a user has multiple games with the same session id? order by ascending and pick the first one
   game = session.query(models.Game).filter(models.Game.session_id==session_id).first()
@@ -32,17 +32,25 @@ def display_card(question):
   return title, content
 
 
-def get_or_create_user(user_id):
-  session = sessions.create_session()
-  user = models.User.query.get(user_id)
+def get_or_create_user(user_id, session):
+  """
+  Based on the unique user id, fetch the user, fallback to creating the user
+
+  @param user_id: The unique identifier for the user
+  @type user_id: str
+
+  @param session: The open connection to the database
+  @type session: sqlalchemy.orm.session.Session
+
+  @return: User
+  @rtype: python_quiz.game.models.User
+  """
+  user = session.query(models.User).get(user_id)
   if user:
-    session.close()
     return user
 
-  user = models.User(account_id=user_id)
+  user = models.User(id=user_id)
   session.add(user)
-  session.commit()
-  session.close()
   return user
 
 def respond_game_summary(session_id):
@@ -92,17 +100,19 @@ def create_game(num_questions, session_id, user_id):
   @param user_id: The identifier of the user, as defined by Amazon
   @type user_id: str
 
-  @return: Game
-  @rtype: python_quiz.game.models.Game
+  @return: ID of the game that was created
+  @rtype: int
   """
-  session = sessions.create_session()
-  user = get_or_create_user(user_id)
-  ids = session.query(models.Question.id).order_by(func.random()).limit(num_questions).all()
-  game = models.Game(count=num_questions, question_ids=ids, question_ids_snapshot=ids, session_id=session_id, user_id=user.id)
-  session.add(game)
-  session.commit()
-  session.close()
-  return game
+  with sessions.active_session(should_commit=False) as session:
+    user = get_or_create_user(user_id, session)
+    ids = session.query(models.Question.id).order_by(func.random()).limit(num_questions).all()
+    current_game = models.Game(count=num_questions, question_ids=ids[0], question_ids_snapshot=ids[0],
+                               session_id=session_id, user_id=user.id)
+    session.add(current_game)
+    session.commit()
+    current_game_id = current_game.id
+    return current_game_id
+
 
 def answer_current_question(session_id, guess):
   """
@@ -116,25 +126,25 @@ def answer_current_question(session_id, guess):
 
   @rtype: True if the guess is correct
   """
-  session = sessions.create_session()
-  game = session.query(models.Game).filter(models.Game.session_id == session_id).first()
-  question_id = game.question_ids.pop()
-  current_question = models.Question.query.get(question_id)
-  is_correct = current_question.answer == int(guess)
+  with sessions.active_session(should_commit=False) as session:
+    game = session.query(models.Game).filter(models.Game.session_id == session_id).order_by('created DESC').first()
+    question_id = game.question_ids.pop()
+    current_question = models.Question.query.with_session(session).get(question_id)
+    is_correct = current_question.answer == int(guess)
 
-  if is_correct:
-    game.count_correct += 1
-  else:
-    game.count_incorrect += 1
-  session.add(game)
-  session.commit()
-  session.close()
-  return is_correct
+    if is_correct:
+      game.count_correct += 1
+    else:
+      game.count_incorrect += 1
+    import pdb;pdb.set_trace()
+    session.add(game)
+    session.commit()
+    return is_correct
 
 def has_next_question(session_id):
   """Whether there is still a question that has not been asked yet"""
   session = sessions.create_session()
   game = session.query(models.Game).filter(models.Game.session_id == session_id).first()
   session.close()
-  return len(game.question_ids) != 0
+  return len(game.question_ids)
 
