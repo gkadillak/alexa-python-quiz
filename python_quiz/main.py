@@ -19,9 +19,9 @@ def start_skill():
 def start_quiz():
   session_id = session.get('sessionId')
   user_id = session['user']['userId']
-  game.create_game(num_questions=1, session_id=session_id, user_id=user_id)
-  rendered_question, question_instance = game.ask_current_question(session_id, user_id)
-  title, content = game.display_card(question_instance)
+  game.create_game(num_questions=2, session_id=session_id, user_id=user_id)
+  rendered_question, question_id = game.ask_current_question(session_id, user_id)
+  title, content = game.display_card(question_id)
   return question(rendered_question).simple_card(title=title, content=content)
 
 
