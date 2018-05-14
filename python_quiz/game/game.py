@@ -1,6 +1,6 @@
 from textwrap import wrap
 
-from sqlalchemy import func
+from sqlalchemy import func, desc
 from flask import render_template
 
 from python_quiz.game import models
@@ -9,26 +9,28 @@ from python_quiz.tools import sessions
 
 
 def ask_current_question(session_id, account_id):
-  get_or_create_user(account_id)
-  session = sessions.create_session()
-  # what if a user has multiple games with the same session id? order by ascending and pick the first one
-  game = session.query(models.Game).filter(models.Game.session_id==session_id).first()
-  current_question = session.query(models.Question).get(game.question_ids.pop())
-  session.add(game)
-  session.commit()
-  return render_template('ask_question',
-                         question=current_question.body,
-                         option_one=current_question.option_one,
-                         option_two=current_question.option_two,
-                         option_three=current_question.option_three,
-                         option_four=current_question.option_four), current_question
+  with sessions.active_session() as session:
+    get_or_create_user(account_id, session)
+    game = session.query(models.Game).filter(models.Game.session_id==session_id).first()
+    current_question = session.query(models.Question).get(game.question_ids.pop())
+    session.add(game)
+    session.commit()
+    return render_template('ask_question',
+                           question=current_question.body,
+                           option_one=current_question.option_one,
+                           option_two=current_question.option_two,
+                           option_three=current_question.option_three,
+                           option_four=current_question.option_four), current_question.id
 
-def display_card(question):
-  title = '\n'.join(wrap(question.body, width=7)) + '?'
-  content = '1. {option_one}\n2.{option_two}\n3.{option_three}\n4.{option_four}'.format(option_one=question.option_one,
-                                                                                        option_two=question.option_two,
-                                                                                        option_three=question.option_three,
-                                                                                        option_four=question.option_four)
+def display_card(question_id):
+  with sessions.active_session() as session:
+    current_question = models.Question.query.with_session(session).get(question_id)
+    title = '\n'.join(wrap(current_question.body, width=7)) + '?'
+    content = '1. {option_one}\n2.{option_two}\n3.{option_three}\n4.{option_four}' \
+      .format(option_one=current_question.option_one,
+              option_two=current_question.option_two,
+              option_three=current_question.option_three,
+              option_four=current_question.option_four)
   return title, content
 
 
@@ -53,11 +55,12 @@ def get_or_create_user(user_id, session):
   session.add(user)
   return user
 
+
 def respond_game_summary(session_id):
-  session = sessions.create_session()
-  game = session.query(models.Game).filter(models.Game.session_id == session_id).first()
-  session.close()
-  return render_template('end_game', number_correct=game.count_correct, total=game.count)
+  with sessions.create_session() as session:
+    game = models.Game.with_session(session).filter(models.Game.session_id == session_id).first()
+    return render_template('end_game', number_correct=game.count_correct, total=game.count)
+
 
 def respond_to_guess(session_id, guess):
   is_correct = answer_current_question(session_id, guess)
@@ -105,8 +108,9 @@ def create_game(num_questions, session_id, user_id):
   """
   with sessions.active_session(should_commit=False) as session:
     user = get_or_create_user(user_id, session)
-    ids = session.query(models.Question.id).order_by(func.random()).limit(num_questions).all()
-    current_game = models.Game(count=num_questions, question_ids=ids[0], question_ids_snapshot=ids[0],
+    ids_raw = session.query(models.Question.id).order_by(func.random()).limit(num_questions).all()
+    ids = [i[0] for i in ids_raw]
+    current_game = models.Game(count=num_questions, question_ids=ids, question_ids_snapshot=ids,
                                session_id=session_id, user_id=user.id)
     session.add(current_game)
     session.commit()
@@ -127,24 +131,23 @@ def answer_current_question(session_id, guess):
   @rtype: True if the guess is correct
   """
   with sessions.active_session(should_commit=False) as session:
-    game = session.query(models.Game).filter(models.Game.session_id == session_id).order_by('created DESC').first()
-    question_id = game.question_ids.pop()
+    current_game = session.query(models.Game).filter(models.Game.session_id == session_id).order_by(desc(models.Game.created)).first()
+    question_id = current_game.question_ids.pop()
     current_question = models.Question.query.with_session(session).get(question_id)
     is_correct = current_question.answer == int(guess)
 
     if is_correct:
-      game.count_correct += 1
+      current_game.count_correct += 1
     else:
-      game.count_incorrect += 1
-    import pdb;pdb.set_trace()
-    session.add(game)
+      current_game.count_incorrect += 1
+
+    session.add(current_game)
     session.commit()
     return is_correct
 
 def has_next_question(session_id):
   """Whether there is still a question that has not been asked yet"""
-  session = sessions.create_session()
-  game = session.query(models.Game).filter(models.Game.session_id == session_id).first()
-  session.close()
-  return len(game.question_ids)
+  with sessions.create_session() as session:
+    game = models.Game.query.with_session(session).filter(models.Game.session_id == session_id).first()
+    return len(game.question_ids)
 

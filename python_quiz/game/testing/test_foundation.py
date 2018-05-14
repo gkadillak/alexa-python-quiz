@@ -1,4 +1,3 @@
-import importlib
 import unittest
 
 from contextlib import contextmanager
@@ -7,15 +6,8 @@ from unittest import mock
 import os
 from flask import Flask
 
-from python_quiz import app, config
+from python_quiz import config
 from python_quiz.app import db
-
-
-@contextmanager
-def env(env_dict, clear=True):
-  stringified_env_dict = {k: str(v) for k, v in env_dict.items()}
-  with mock.patch.dict("os.environ", stringified_env_dict, clear=clear):
-    yield
 
 
 class TestFoundation(unittest.TestCase):
@@ -30,6 +22,8 @@ class TestFoundation(unittest.TestCase):
     self.app.config.from_object(config.TestingConfig)
     db.init_app(self.app)
     with self.app.app_context():
+      db.session.close_all()
+      db.drop_all()
       db.create_all()
 
 

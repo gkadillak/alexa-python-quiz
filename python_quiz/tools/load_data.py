@@ -20,7 +20,6 @@ def load_data():
       except Exception as e:
         # Print what went wrong and inspect
         print(e)
-        import pdb;pdb.set_trace()
 
       questions.append(quest)
   session.add_all(questions)
