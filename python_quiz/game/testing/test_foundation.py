@@ -1,13 +1,10 @@
+import os
 import unittest
 
-from contextlib import contextmanager
-from unittest import mock
-
-import os
 from flask import Flask
 
-from python_quiz import config
 from python_quiz.app import db
+from python_quiz.tools import config
 
 
 class TestFoundation(unittest.TestCase):

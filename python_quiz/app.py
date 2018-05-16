@@ -6,7 +6,7 @@ from flask_ask import Ask
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 
-from . import config
+from .tools import config
 
 flask_app = Flask(__name__)
 flask_app.config.from_object(os.environ['APP_SETTINGS'])
