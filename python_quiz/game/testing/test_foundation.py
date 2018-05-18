@@ -3,7 +3,7 @@ import unittest
 
 from flask import Flask
 
-from python_quiz.app import db
+from app import db
 from python_quiz.tools import config
 
 

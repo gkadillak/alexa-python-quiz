@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from python_quiz import app
+import app
 
 
 class BaseModel(app.db.Model):

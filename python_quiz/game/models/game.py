@@ -1,7 +1,7 @@
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.ext.mutable import Mutable
 
-from python_quiz import app
+import app
 from python_quiz.game.models import base
 
 

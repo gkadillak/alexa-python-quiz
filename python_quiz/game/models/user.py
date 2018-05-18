@@ -1,4 +1,4 @@
-from python_quiz import app
+import app
 from python_quiz.game.models import base
 
 

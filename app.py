@@ -6,7 +6,7 @@ from flask_ask import Ask
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 
-from .tools import config
+from python_quiz.tools import config
 
 flask_app = Flask(__name__)
 flask_app.config.from_object(os.environ['APP_SETTINGS'])
@@ -17,7 +17,7 @@ configs = config
 
 # models need to be imported to track migration changes
 try:
-  from .game import models
+  from python_quiz.game import models
 except ImportError:
   pass
 
@@ -27,4 +27,7 @@ migrate = Migrate(flask_app, db)
 logger = logging.getLogger(__name__)
 flask_ask_logger = logging.getLogger('flask_ask')
 
-from . import main
+from python_quiz import main
+
+if __name__ == '__main__':
+  flask_app.run(host='0.0.0.0')
