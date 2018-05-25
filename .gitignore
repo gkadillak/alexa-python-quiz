@@ -6,7 +6,6 @@ venv/
 .pytest_cache/
 .idea/
 bin/
-config.py
 lib/
 pip-selfcheck.json
 pyvenv.cfg
