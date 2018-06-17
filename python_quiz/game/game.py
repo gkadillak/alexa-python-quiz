@@ -1,3 +1,4 @@
+import logging
 from textwrap import wrap
 
 from sqlalchemy import func, desc
@@ -7,12 +8,15 @@ from python_quiz.game import models
 from python_quiz.game.constants import game_pb
 from python_quiz.tools import sessions
 
+logger = logging.getLogger(__name__)
+
 
 def ask_current_question(session_id, account_id):
   with sessions.active_session() as session:
     get_or_create_user(account_id, session)
     game = session.query(models.Game).filter(models.Game.session_id==session_id).first()
     current_question = session.query(models.Question).get(game.question_ids.pop())
+    logger.info('game=%s question=%s', game.id, current_question.body)
     session.add(game)
     session.commit()
     return render_template('ask_question',
@@ -49,8 +53,10 @@ def get_or_create_user(user_id, session):
   """
   user = session.query(models.User).get(user_id)
   if user:
+    logger.info('get_or_create_user user found for user_id=%s', user_id)
     return user
 
+  logger.info('user not found for user_id=%s so creating user', user_id)
   user = models.User(id=user_id)
   session.add(user)
   return user
@@ -131,9 +137,11 @@ def answer_current_question(session_id, guess):
   @rtype: True if the guess is correct
   """
   with sessions.active_session(should_commit=False) as session:
-    current_game = session.query(models.Game).filter(models.Game.session_id == session_id).order_by(desc(models.Game.created)).first()
+    current_game = session.query(models.Game)\
+      .filter(models.Game.session_id == session_id).order_by(desc(models.Game.created)).first()
     question_id = current_game.question_ids.pop()
     current_question = models.Question.query.with_session(session).get(question_id)
+    logger.info("question=%s, guess=%s", current_question, guess)
     is_correct = current_question.answer == int(guess)
 
     if is_correct:
