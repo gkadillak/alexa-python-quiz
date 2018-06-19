@@ -18,14 +18,11 @@ class ProductionConfig(Config):
   SQLALCHEMY_DATABASE_URI = DATABASE_URL
 
 
-class StagingConfig(Config):
-  DEVELOPMENT = True
-  DEBUG = True
-
-
 class DevelopmentConfig(Config):
   DEVELOPMENT = True
   DEBUG = True
+  DATABASE_URL = 'postgresql://localhost:5432/test_python_quiz'
+  FLASK_APP = 'app.py'
 
 
 class TestingConfig(Config):
@@ -34,12 +31,3 @@ class TestingConfig(Config):
   SQLALCHEMY_DATABASE_URI = os.environ['TESTING_DATABASE_URL']
   LANG = 'en_US.UTF-8'
   DATABASE_URL = 'postgresql://localhost:5432/test_python_quiz'
-
-
-class BootstrapTesting(object):
-  FLASK_DEBUG = 1
-  FLASK_APP = os.path.expanduser('~/projects/quiz_game/python_quiz/app.py')
-  DATABASE_URL = 'postgresql://localhost:5432/test_python_quiz'
-  TESTING_DATABASE_URL = 'postgresql://localhost:5432/test_python_quiz'
-  APP_SETTINGS = 'python_quiz.tools.config.TestingConfig'
-  LANG = 'en_US.UTF-8'
