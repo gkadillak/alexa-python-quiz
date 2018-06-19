@@ -1,9 +1,6 @@
+import os
 import unittest
 
-from contextlib import contextmanager
-from unittest import mock
-
-import os
 from flask import Flask
 
 from python_quiz.app import db
