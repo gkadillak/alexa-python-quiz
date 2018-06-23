@@ -66,7 +66,4 @@ class GameTests(test_foundation.TestFoundation):
     game.answer_current_question(session_id='123', guess='2')
     game.answer_current_question(session_id='123', guess='2')
 
-    with sessions.active_session() as session:
-      current_game = session.query(models.Game).get(current_game_id)
-
-      assert len(current_game.question_ids) == 0, "There should be no more questions"
+    assert game.has_next_question(session_id='123') == False
