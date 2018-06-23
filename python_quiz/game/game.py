@@ -155,7 +155,7 @@ def answer_current_question(session_id, guess):
 
 def has_next_question(session_id):
   """Whether there is still a question that has not been asked yet"""
-  with sessions.create_session() as session:
+  with sessions.active_session(should_commit=False) as session:
     game = models.Game.query.with_session(session).filter(models.Game.session_id == session_id).first()
     return len(game.question_ids)
 
