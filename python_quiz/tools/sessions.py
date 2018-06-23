@@ -1,8 +1,12 @@
+import logging
 import os
+
 from contextlib import contextmanager
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+
+logger = logging.getLogger(__name__)
 
 
 def create_session():
@@ -31,8 +35,9 @@ def active_session(should_commit=True):
     yield session
     if should_commit:
       session.commit()
-  except:
+  except Exception as exc:
     session.rollback()
+    logger.error("Exception when rolling back: %s" % exc)
     raise
   finally:
     session.close()
