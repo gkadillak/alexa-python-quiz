@@ -60,7 +60,7 @@ class GameTests(test_foundation.TestFoundation):
         models.Question(body='what part deaux', option_one='1', option_two='2', option_three='3', option_four='4', answer='2')
       ])
 
-    current_game_id = game.create_game(num_questions=2, session_id='123', user_id='1234')
+    game.create_game(num_questions=2, session_id='123', user_id='1234')
 
     # answer all of the questions
     game.answer_current_question(session_id='123', guess='2')
