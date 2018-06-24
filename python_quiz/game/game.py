@@ -11,20 +11,22 @@ from python_quiz.tools import sessions
 logger = logging.getLogger(__name__)
 
 
-def ask_current_question(session_id, account_id):
-  with sessions.active_session() as session:
-    get_or_create_user(account_id, session)
+def ask_current_question(session_id, user_id):
+  current_question = _query_current_question(session_id, user_id)
+  return render_template('ask_question',
+                         question=current_question.body,
+                         option_one=current_question.option_one,
+                         option_two=current_question.option_two,
+                         option_three=current_question.option_three,
+                         option_four=current_question.option_four), current_question.id
+
+def _query_current_question(session_id, user_id):
+  with sessions.active_session(should_commit=False) as session:
+    get_or_create_user(user_id, session)
     game = session.query(models.Game).filter(models.Game.session_id==session_id).first()
     current_question = session.query(models.Question).get(game.question_ids.pop())
     logger.info('game=%s question=%s', game.id, current_question.body)
-    session.add(game)
-    session.commit()
-    return render_template('ask_question',
-                           question=current_question.body,
-                           option_one=current_question.option_one,
-                           option_two=current_question.option_two,
-                           option_three=current_question.option_three,
-                           option_four=current_question.option_four), current_question.id
+    return current_question
 
 def display_card(question_id):
   with sessions.active_session() as session:

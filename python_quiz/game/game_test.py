@@ -67,3 +67,28 @@ class GameTests(test_foundation.TestFoundation):
     game.answer_current_question(session_id='123', guess='2')
 
     assert game.has_next_question(session_id='123') == False
+
+  def test_game_flow(self):
+    """
+    This is really a test of the state machine. Let's say we have 2 questions for a quiz.
+    If we have a list of questions as [A, B], what we want to do is...
+
+    - Start the game and ask question B. The list should be untouched, [A, B]
+    - Answer the question B which should pop off of the stack and then we should ask question [A]
+    - We answer question A, and we're left with an empty list and the game is over.
+
+    This is to fix the bug where we were getting to the point where we wanted to ask question A, but we had an
+    empty stack so we would try to pop an empty list. In short, asking a question should not be a mutable operation.
+    """
+    with sessions.active_session() as session:
+      session.add_all([
+        models.Question(body='what', option_one='1', option_two='2', option_three='3', option_four='4', answer='1')
+      ])
+
+    game.create_game(num_questions=2, session_id='123', user_id='1234')
+
+    with sessions.active_session(should_commit=False) as session:
+      game._query_current_question(session_id='123', user_id='1')
+    game.answer_current_question(session_id='123', guess='2')
+
+    assert game.has_next_question(session_id='123') == False
