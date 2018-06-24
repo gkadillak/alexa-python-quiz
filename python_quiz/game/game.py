@@ -65,7 +65,7 @@ def get_or_create_user(user_id, session):
 def respond_game_summary(session_id):
   with sessions.create_session() as session:
     game = models.Game.with_session(session).filter(models.Game.session_id == session_id).first()
-    return render_template('end_game', number_correct=game.count_correct, total=game.count)
+    return render_template('game_end', number_correct=game.count_correct, total=game.count)
 
 
 def respond_to_guess(session_id, guess):
