@@ -29,6 +29,6 @@ class TestingConfig(Config):
   DEBUG = True
   TESTS_RUNNING = True
   TESTING = True
-  SQLALCHEMY_DATABASE_URI = os.environ['TESTING_DATABASE_URL']
+  SQLALCHEMY_DATABASE_URI = os.environ.get('TESTING_DATABASE_URL')
   LANG = 'en_US.UTF-8'
   DATABASE_URL = 'postgresql://localhost:5432/test_python_quiz'
