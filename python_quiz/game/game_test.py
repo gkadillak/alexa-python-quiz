@@ -84,11 +84,14 @@ class GameTests(test_foundation.TestFoundation):
       session.add_all([
         models.Question(body='what', option_one='1', option_two='2', option_three='3', option_four='4', answer='1')
       ])
+      session.add_all([
+        models.Question(body='what', option_one='1', option_two='2', option_three='3', option_four='4', answer='1')
+      ])
 
     game.create_game(num_questions=2, session_id='123', user_id='1234')
 
-    with sessions.active_session(should_commit=False) as session:
+    with sessions.active_session(should_commit=False):
       game._query_current_question(session_id='123', user_id='1')
     game.answer_current_question(session_id='123', guess='2')
 
-    assert game.has_next_question(session_id='123') == False
+    assert game.has_next_question(session_id='123') == True
