@@ -1,9 +1,7 @@
 import os
 import unittest
 
-from flask import Flask
-
-from python_quiz.app import db
+from python_quiz.app import db, flask_app
 from python_quiz.configs import flask_configs
 
 
@@ -13,10 +11,9 @@ class TestFoundation(unittest.TestCase):
     """
     Create the current version of the production database
     """
-    os.environ['TESTS_RUNNING'] = '1'
     # migrate all changes to the db
-    self.app = Flask(__name__)
-    self.app.config.from_object(flask_configs.TestingConfig)
+    self.app = flask_app
+    flask_app.config.from_object(flask_configs.TestingConfig)
     db.init_app(self.app)
     with self.app.app_context():
       db.session.close_all()
