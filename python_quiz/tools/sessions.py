@@ -15,7 +15,7 @@ def create_session():
 
   @rtype: sqlalchemy.orm.session.Session
   """
-  if 'TESTS_RUNNING' in os.environ:
+  if 'TESTING_DATABASE_URL' in os.environ:
     engine = create_engine(os.environ['TESTING_DATABASE_URL'])
   else:
     engine = create_engine(os.environ['DATABASE_URL'])

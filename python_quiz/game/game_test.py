@@ -1,17 +1,20 @@
+import json
+from unittest import mock
+
 from python_quiz.game import game, models
 from python_quiz.game.testing import test_foundation
+from python_quiz.game.testing.fixtures import requests
 from python_quiz.tools import sessions
 
 
 class GameTests(test_foundation.TestFoundation):
-
   def test_questions_collection(self):
     """Test that a single game is successfully created"""
     with sessions.active_session() as session:
       games = models.Game.query.with_session(session).all()
       assert not games
 
-    game.create_game(num_questions=1, session_id="abc", user_id="123")
+    game.create_game(num_questions=1, session_id="abc", user_id=requests.SESSION_ID)
 
     with sessions.active_session() as session:
       games = models.Game.query.with_session(session).all()
@@ -32,7 +35,6 @@ class GameTests(test_foundation.TestFoundation):
     with sessions.active_session() as session:
       new_game = session.query(models.Game).get(current_game_id)
       assert new_game.count_correct == 1
-
 
   def test_incorrect_answer(self):
     """Test the basic assumptions about answering a question incorrectly"""
@@ -90,8 +92,35 @@ class GameTests(test_foundation.TestFoundation):
 
     game.create_game(num_questions=2, session_id='123', user_id='1234')
 
+    with self.app.app_context():
+      game.respond_to_guess('123', '1')
+
     with sessions.active_session(should_commit=False):
       game._query_current_question(session_id='123', user_id='1')
     game.answer_current_question(session_id='123', guess='2')
 
-    assert game.has_next_question(session_id='123') == True
+    assert game.has_next_question(session_id='123') == False
+
+
+class IntegrationTest(test_foundation.TestFoundation):
+
+  def setUp(self):
+    super().setUp()
+    self.test_app = self.app.test_client()
+
+  def test_full_quiz(self):
+    """Test starting and ending a quiz"""
+    with sessions.active_session() as session:
+      session.add_all([
+        models.Question(body='what', option_one='1', option_two='2', option_three='3', option_four='4', answer='1')
+      ])
+      session.add_all([
+        models.Question(body='what', option_one='1', option_two='2', option_three='3', option_four='4', answer='1')
+      ])
+
+    game.create_game(num_questions=2, session_id=requests.SESSION_ID, user_id=requests.USER_ID)
+    with mock.patch("python_quiz.main.game.create_game"):
+      self.test_app.post('/python_quiz', data=json.dumps(requests.start_game_body))
+
+    self.test_app.post('/python_quiz', data=json.dumps(requests.guess_body))
+    self.test_app.post('/python_quiz', data=json.dumps(requests.guess_body))
