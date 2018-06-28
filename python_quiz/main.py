@@ -4,6 +4,7 @@ from flask_ask import question, session, statement
 
 from python_quiz.app import ask
 from python_quiz.game import constants, game
+from python_quiz.game.constants import game_pb
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +20,7 @@ def start_quiz():
   session_id = session.get('sessionId')
   user_id = session['user']['userId']
   game.create_game(num_questions=2, session_id=session_id, user_id=user_id)
-  rendered_question, question_id = game.ask_current_question(session_id, user_id)
+  rendered_question, question_id = game.ask_current_question(template_name='ask_question', session_id=session_id, user_id=user_id)
   title, content = game.display_card(question_id)
   return question(rendered_question).simple_card(title=title, content=content)
 

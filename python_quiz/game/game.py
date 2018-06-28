@@ -11,9 +11,9 @@ from python_quiz.tools import sessions
 logger = logging.getLogger(__name__)
 
 
-def ask_current_question(session_id, user_id):
+def ask_current_question(template_name, session_id, user_id):
   current_question = _query_current_question(session_id, user_id)
-  return render_template('ask_question',
+  return render_template(template_name,
                          question=current_question.body,
                          option_one=current_question.option_one,
                          option_two=current_question.option_two,
@@ -80,12 +80,11 @@ def respond_to_guess(session_id, guess):
 
   # if the answer is correct, tell the user, and there is a next question, ask it!
   if is_correct and has_another_question:
-    correct_answer_response = render_template('correct_with_next_question')
-    next_question_response = ask_current_question(session_id=session_id, user_id=game.user_id)
+    next_question_response = ask_current_question(template_name='correct_with_next_question', session_id=session_id, user_id=game.user_id)
     if isinstance(next_question_response, tuple):
       next_question_response = next_question_response[0]
 
-    return correct_answer_response + next_question_response, game_pb.ResponseType.QUESTION
+    return next_question_response, game_pb.ResponseType.QUESTION
 
   # if the answer is correct and there is no next question, return the game summary
   elif is_correct and not has_another_question:
@@ -93,11 +92,10 @@ def respond_to_guess(session_id, guess):
 
   # if the answer is incorrect, and there is a next question, ask it!
   elif not is_correct and has_another_question:
-    incorrect_answer_response = render_template('incorrect_with_next_question')
-    next_question_response = ask_current_question(session_id=session_id, user_id=game.user_id)
+    next_question_response = ask_current_question(template_name='incorrect_with_next_question', session_id=session_id, user_id=game.user_id)
     if isinstance(next_question_response, tuple):
       next_question_response = next_question_response[0]
-    return incorrect_answer_response + next_question_response, game_pb.ResponseType.QUESTION
+    return next_question_response, game_pb.ResponseType.QUESTION
 
   # if the answer is incorrect, and there is no next question, return the game summary
   elif not is_correct and not has_another_question:
