@@ -4,7 +4,6 @@ from flask_ask import question, session, statement
 
 from python_quiz.app import ask
 from python_quiz.game import constants, game
-from python_quiz.game.constants import game_pb
 
 logger = logging.getLogger(__name__)
 

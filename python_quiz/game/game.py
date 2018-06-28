@@ -82,6 +82,9 @@ def respond_to_guess(session_id, guess):
   if is_correct and has_another_question:
     correct_answer_response = render_template('correct_with_next_question')
     next_question_response = ask_current_question(session_id=session_id, user_id=game.user_id)
+    if isinstance(next_question_response, tuple):
+      next_question_response = next_question_response[0]
+
     return correct_answer_response + next_question_response, game_pb.ResponseType.QUESTION
 
   # if the answer is correct and there is no next question, return the game summary
@@ -92,6 +95,8 @@ def respond_to_guess(session_id, guess):
   elif not is_correct and has_another_question:
     incorrect_answer_response = render_template('incorrect_with_next_question')
     next_question_response = ask_current_question(session_id=session_id, user_id=game.user_id)
+    if isinstance(next_question_response, tuple):
+      next_question_response = next_question_response[0]
     return incorrect_answer_response + next_question_response, game_pb.ResponseType.QUESTION
 
   # if the answer is incorrect, and there is no next question, return the game summary
