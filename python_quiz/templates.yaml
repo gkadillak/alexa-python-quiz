@@ -10,7 +10,7 @@ game_end: |
 
 correct_with_next_question: |
   <speak>
-    Correct! Here's the next question:
+    Correct! Here's the next question: {{ question }}? Is it one, {{ option_one }}, two {{ option_two }}, three {{ option_three }} or four {{ option_four }}?
   </speak>
 
 correct_with_no_next_question: |
@@ -20,7 +20,7 @@ correct_with_no_next_question: |
 
 incorrect_answer_with_next_question: |
   <speak>
-    I'm sorry, that's incorrect. Here's the next question:
+    I'm sorry, that's incorrect. Here's the next question: {{ question }}? Is it one, {{ option_one }}, two {{ option_two }}, three {{ option_three }} or four {{ option_four }}?
   </speak>
 
 incorrect_with_no_next_question: |
@@ -31,5 +31,5 @@ incorrect_with_no_next_question: |
 
 incorrect_with_next_question: |
   <speak>
-    I'm sorry, that's incorrect. Here's the next question:
+    I'm sorry, that's incorrect. Here's the next question: {{ question }}? Is it one, {{ option_one }}, two {{ option_two }}, three {{ option_three }} or four {{ option_four }}?
   </speak>
