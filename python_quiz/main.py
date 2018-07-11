@@ -1,8 +1,9 @@
 import logging
 
+from flask import render_template
 from flask_ask import question, session, statement
 
-from python_quiz.app import ask
+from python_quiz.app import ask, flask_app
 from python_quiz.game import constants, game
 from python_quiz.game.constants import game_pb
 
@@ -42,3 +43,7 @@ def _answer_question(guess):
 @ask.intent('AMAZON.StopIntent')
 def stop_quiz():
   return statement('Thanks for playing Python Quiz. Goodbye!')
+
+@flask_app.route('/terms')
+def terms():
+  return render_template('terms.html')

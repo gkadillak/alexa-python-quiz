@@ -26,7 +26,7 @@ incorrect_answer_with_next_question: |
 incorrect_with_no_next_question: |
   <speak>
     I'm sorry, that's incorrect. That was the last question.
-    You've answered {{ count_correct }} out of {{ count_total }}.
+    You've answered {{ count_correct }} correct out of {{ count_total }}.
   </speak>
 
 incorrect_with_next_question: |
