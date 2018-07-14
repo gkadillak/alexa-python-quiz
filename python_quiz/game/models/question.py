@@ -4,7 +4,7 @@ from python_quiz.game.models import base
 
 class Question(base.BaseModel):
 
-    __tablename__ = 'questions'
+    __tablename__ = "questions"
 
     id = app.db.Column(app.db.Integer, primary_key=True)
 
@@ -26,10 +26,7 @@ class Question(base.BaseModel):
     answer = app.db.Column(app.db.Integer, nullable=False)
     """The answer for the question"""
 
-    __mapper_args = {
-        'polymorphic_identity': 'questions',
-        'concrete': True
-    }
+    __mapper_args = {"polymorphic_identity": "questions", "concrete": True}
 
     def __init__(self, body, option_one, option_two, option_three, option_four, answer):
         self.body = body
@@ -40,4 +37,4 @@ class Question(base.BaseModel):
         self.answer = answer
 
     def __repr__(self):
-        return '<Question: %s>' % self.body
+        return "<Question: %s>" % self.body

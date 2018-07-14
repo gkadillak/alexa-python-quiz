@@ -12,36 +12,48 @@ logger = logging.getLogger(__name__)
 
 
 def ask_current_question(template_name, session_id, user_id):
-  current_question = _query_current_question(session_id, user_id)
-  return render_template(template_name,
-                         question=current_question.body,
-                         option_one=current_question.option_one,
-                         option_two=current_question.option_two,
-                         option_three=current_question.option_three,
-                         option_four=current_question.option_four), current_question.id
+    current_question = _query_current_question(session_id, user_id)
+    return (
+        render_template(
+            template_name,
+            question=current_question.body,
+            option_one=current_question.option_one,
+            option_two=current_question.option_two,
+            option_three=current_question.option_three,
+            option_four=current_question.option_four,
+        ),
+        current_question.id,
+    )
+
 
 def _query_current_question(session_id, user_id):
-  with sessions.active_session(should_commit=False) as session:
-    get_or_create_user(user_id, session)
-    game = session.query(models.Game).filter(models.Game.session_id==session_id).first()
-    current_question = session.query(models.Question).get(game.question_ids.pop())
-    logger.info('game=%s question=%s', game.id, current_question.body)
-    return current_question
+    with sessions.active_session(should_commit=False) as session:
+        get_or_create_user(user_id, session)
+        game = (
+            session.query(models.Game)
+            .filter(models.Game.session_id == session_id)
+            .first()
+        )
+        current_question = session.query(models.Question).get(game.question_ids.pop())
+        logger.info("game=%s question=%s", game.id, current_question.body)
+        return current_question
+
 
 def display_card(question_id):
-  with sessions.active_session() as session:
-    current_question = models.Question.query.with_session(session).get(question_id)
-    title = '\n'.join(wrap(current_question.body, width=7)) + '?'
-    content = '1. {option_one}\n2.{option_two}\n3.{option_three}\n4.{option_four}' \
-      .format(option_one=current_question.option_one,
-              option_two=current_question.option_two,
-              option_three=current_question.option_three,
-              option_four=current_question.option_four)
-  return title, content
+    with sessions.active_session() as session:
+        current_question = models.Question.query.with_session(session).get(question_id)
+        title = "\n".join(wrap(current_question.body, width=7)) + "?"
+        content = "1. {option_one}\n2.{option_two}\n3.{option_three}\n4.{option_four}".format(
+            option_one=current_question.option_one,
+            option_two=current_question.option_two,
+            option_three=current_question.option_three,
+            option_four=current_question.option_four,
+        )
+    return title, content
 
 
 def get_or_create_user(user_id, session):
-  """
+    """
   Based on the unique user id, fetch the user, fallback to creating the user
 
   @param user_id: The unique identifier for the user
@@ -53,56 +65,87 @@ def get_or_create_user(user_id, session):
   @return: User
   @rtype: python_quiz.game.models.User
   """
-  user = session.query(models.User).get(user_id)
-  if user:
-    logger.info('get_or_create_user user found for user_id=%s', user_id)
-    return user
+    user = session.query(models.User).get(user_id)
+    if user:
+        logger.info("get_or_create_user user found for user_id=%s", user_id)
+        return user
 
-  logger.info('user not found for user_id=%s so creating user', user_id)
-  user = models.User(id=user_id)
-  session.add(user)
-  return user
+    logger.info("user not found for user_id=%s so creating user", user_id)
+    user = models.User(id=user_id)
+    session.add(user)
+    return user
 
 
 def respond_game_summary(session_id):
-  with sessions.create_session() as session:
-    game = models.Game.with_session(session).filter(models.Game.session_id == session_id).first()
-    return render_template('game_end', number_correct=game.count_correct, total=game.count)
+    with sessions.create_session() as session:
+        game = (
+            models.Game.with_session(session)
+            .filter(models.Game.session_id == session_id)
+            .first()
+        )
+        return render_template(
+            "game_end", number_correct=game.count_correct, total=game.count
+        )
 
 
 def respond_to_guess(session_id, guess):
-  is_correct = answer_current_question(session_id, guess)
-  has_another_question = has_next_question(session_id)
+    is_correct = answer_current_question(session_id, guess)
+    has_another_question = has_next_question(session_id)
 
-  session = sessions.create_session()
-  game = session.query(models.Game).filter(models.Game.session_id == session_id).first()
-  session.close()
+    session = sessions.create_session()
+    game = (
+        session.query(models.Game).filter(models.Game.session_id == session_id).first()
+    )
+    session.close()
 
-  # if the answer is correct, tell the user, and there is a next question, ask it!
-  if is_correct and has_another_question:
-    next_question_response = ask_current_question(template_name='correct_with_next_question', session_id=session_id, user_id=game.user_id)
-    if isinstance(next_question_response, tuple):
-      next_question_response = next_question_response[0]
+    # if the answer is correct, tell the user, and there is a next question, ask it!
+    if is_correct and has_another_question:
+        next_question_response = ask_current_question(
+            template_name="correct_with_next_question",
+            session_id=session_id,
+            user_id=game.user_id,
+        )
+        if isinstance(next_question_response, tuple):
+            next_question_response = next_question_response[0]
 
-    return next_question_response, game_pb.ResponseType.QUESTION
+        return next_question_response, game_pb.ResponseType.QUESTION
 
-  # if the answer is correct and there is no next question, return the game summary
-  elif is_correct and not has_another_question:
-    return render_template('correct_with_no_next_question', count_correct=game.count_correct, count_total=game.count), game_pb.ResponseType.STATEMENT
+    # if the answer is correct and there is no next question, return the game summary
+    elif is_correct and not has_another_question:
+        return (
+            render_template(
+                "correct_with_no_next_question",
+                count_correct=game.count_correct,
+                count_total=game.count,
+            ),
+            game_pb.ResponseType.STATEMENT,
+        )
 
-  # if the answer is incorrect, and there is a next question, ask it!
-  elif not is_correct and has_another_question:
-    next_question_response = ask_current_question(template_name='incorrect_with_next_question', session_id=session_id, user_id=game.user_id)
-    if isinstance(next_question_response, tuple):
-      next_question_response = next_question_response[0]
-    return next_question_response, game_pb.ResponseType.QUESTION
+    # if the answer is incorrect, and there is a next question, ask it!
+    elif not is_correct and has_another_question:
+        next_question_response = ask_current_question(
+            template_name="incorrect_with_next_question",
+            session_id=session_id,
+            user_id=game.user_id,
+        )
+        if isinstance(next_question_response, tuple):
+            next_question_response = next_question_response[0]
+        return next_question_response, game_pb.ResponseType.QUESTION
 
-  # if the answer is incorrect, and there is no next question, return the game summary
-  elif not is_correct and not has_another_question:
-    return render_template('incorrect_with_no_next_question', count_correct=game.count_correct, count_total=game.count), game_pb.ResponseType.STATEMENT
+    # if the answer is incorrect, and there is no next question, return the game summary
+    elif not is_correct and not has_another_question:
+        return (
+            render_template(
+                "incorrect_with_no_next_question",
+                count_correct=game.count_correct,
+                count_total=game.count,
+            ),
+            game_pb.ResponseType.STATEMENT,
+        )
+
 
 def create_game(num_questions, session_id, user_id):
-  """
+    """
   Instantiate a game and persist it to the database
 
   @param num_questions: Number of questions to use for the quiz
@@ -117,20 +160,30 @@ def create_game(num_questions, session_id, user_id):
   @return: ID of the game that was created
   @rtype: int
   """
-  with sessions.active_session(should_commit=False) as session:
-    user = get_or_create_user(user_id, session)
-    ids_raw = session.query(models.Question.id).order_by(func.random()).limit(num_questions).all()
-    ids = [i[0] for i in ids_raw]
-    current_game = models.Game(count=num_questions, question_ids=ids, question_ids_snapshot=ids,
-                               session_id=session_id, user_id=user.id)
-    session.add(current_game)
-    session.commit()
-    current_game_id = current_game.id
-    return current_game_id
+    with sessions.active_session(should_commit=False) as session:
+        user = get_or_create_user(user_id, session)
+        ids_raw = (
+            session.query(models.Question.id)
+            .order_by(func.random())
+            .limit(num_questions)
+            .all()
+        )
+        ids = [i[0] for i in ids_raw]
+        current_game = models.Game(
+            count=num_questions,
+            question_ids=ids,
+            question_ids_snapshot=ids,
+            session_id=session_id,
+            user_id=user.id,
+        )
+        session.add(current_game)
+        session.commit()
+        current_game_id = current_game.id
+        return current_game_id
 
 
 def answer_current_question(session_id, guess):
-  """
+    """
   Answer the current question based on the current session
 
   @param session_id: The identifier for the current session
@@ -141,26 +194,34 @@ def answer_current_question(session_id, guess):
 
   @rtype: True if the guess is correct
   """
-  with sessions.active_session(should_commit=False) as session:
-    current_game = session.query(models.Game)\
-      .filter(models.Game.session_id == session_id).order_by(desc(models.Game.created)).first()
-    question_id = current_game.question_ids.pop()
-    current_question = models.Question.query.with_session(session).get(question_id)
-    logger.info("question=%s, guess=%s", current_question, guess)
-    is_correct = current_question.answer == int(guess)
+    with sessions.active_session(should_commit=False) as session:
+        current_game = (
+            session.query(models.Game)
+            .filter(models.Game.session_id == session_id)
+            .order_by(desc(models.Game.created))
+            .first()
+        )
+        question_id = current_game.question_ids.pop()
+        current_question = models.Question.query.with_session(session).get(question_id)
+        logger.info("question=%s, guess=%s", current_question, guess)
+        is_correct = current_question.answer == int(guess)
 
-    if is_correct:
-      current_game.count_correct += 1
-    else:
-      current_game.count_incorrect += 1
+        if is_correct:
+            current_game.count_correct += 1
+        else:
+            current_game.count_incorrect += 1
 
-    session.add(current_game)
-    session.commit()
-    return is_correct
+        session.add(current_game)
+        session.commit()
+        return is_correct
+
 
 def has_next_question(session_id):
-  """Whether there is still a question that has not been asked yet"""
-  with sessions.active_session(should_commit=False) as session:
-    game = models.Game.query.with_session(session).filter(models.Game.session_id == session_id).first()
-    return len(game.question_ids)
-
+    """Whether there is still a question that has not been asked yet"""
+    with sessions.active_session(should_commit=False) as session:
+        game = (
+            models.Game.query.with_session(session)
+            .filter(models.Game.session_id == session_id)
+            .first()
+        )
+        return len(game.question_ids)
