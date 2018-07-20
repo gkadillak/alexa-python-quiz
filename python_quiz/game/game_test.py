@@ -8,6 +8,7 @@ from python_quiz.tools import sessions
 
 
 class GameTests(test_foundation.TestFoundation):
+
   def test_questions_collection(self):
     """Test that a single game is successfully created"""
     with sessions.active_session() as session:
@@ -100,6 +101,26 @@ class GameTests(test_foundation.TestFoundation):
     game.answer_current_question(session_id='123', guess='2')
 
     assert game.has_next_question(session_id='123') == False
+
+  def test_unique_games(self):
+    """Test that subsequent games don't repeat questions"""
+    with sessions.active_session() as session:
+      session.add_all([
+        models.Question(body='what', option_one='1', option_two='2', option_three='3', option_four='4', answer='1')
+      ])
+
+    # create a game with a single question
+    game.create_game(num_questions=1, session_id='123', user_id='1234')
+
+    # complete the first game
+    with self.app.app_context():
+      game.respond_to_guess('123', '1')
+
+    game.create_game(num_questions=1, session_id='456', user_id='1234')
+
+    # since the questions a person can be asked are unique, there should not be another question
+    # to ask the user, therefore there should not be another question
+    assert game.has_next_question(session_id='456') == False
 
 
 class IntegrationTest(test_foundation.TestFoundation):

@@ -1,4 +1,5 @@
 import logging
+import random
 from textwrap import wrap
 
 from sqlalchemy import func, desc
@@ -117,14 +118,25 @@ def create_game(num_questions, session_id, user_id):
   @return: ID of the game that was created
   @rtype: int
   """
-  with sessions.active_session(should_commit=False) as session:
+  with sessions.active_session() as session:
     user = get_or_create_user(user_id, session)
-    ids_raw = session.query(models.Question.id).order_by(func.random()).limit(num_questions).all()
-    ids = [i[0] for i in ids_raw]
-    current_game = models.Game(count=num_questions, question_ids=ids, question_ids_snapshot=ids,
+    question_id_tuples = session.query(models.Question.id).all()
+    all_ids_set = set(t[0] for t in question_id_tuples)  # each tuple (row) only has one value in it
+    asked_questions_set = set(user.asked_questions)
+    possible_questions = all_ids_set.difference(asked_questions_set)
+
+    try:
+      question_ids = random.sample(possible_questions, num_questions)
+    except ValueError:
+      # if the sample is bigger than the population, we hit this case
+      # which means that there are no possible questions to ask
+      question_ids = []
+
+    current_game = models.Game(count=num_questions, question_ids=question_ids, question_ids_snapshot=question_ids,
                                session_id=session_id, user_id=user.id)
+    user.asked_questions.extend(question_ids)
     session.add(current_game)
-    session.commit()
+    session.add(user)
     current_game_id = current_game.id
     return current_game_id
 
@@ -162,5 +174,5 @@ def has_next_question(session_id):
   """Whether there is still a question that has not been asked yet"""
   with sessions.active_session(should_commit=False) as session:
     game = models.Game.query.with_session(session).filter(models.Game.session_id == session_id).first()
-    return len(game.question_ids)
+    return bool(len(game.question_ids))
 
