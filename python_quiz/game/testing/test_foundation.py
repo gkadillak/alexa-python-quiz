@@ -1,4 +1,3 @@
-import os
 import unittest
 
 from python_quiz.app import db, flask_app
@@ -9,7 +8,8 @@ class TestFoundation(unittest.TestCase):
 
   def setUp(self):
     """
-    Create the current version of the production database
+    Create the current version of the production database with
+    all current migrations applied to the database
     """
     # migrate all changes to the db
     self.app = flask_app
