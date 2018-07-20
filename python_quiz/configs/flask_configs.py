@@ -13,7 +13,7 @@ class Config(object):
 
 class ProductionConfig(Config):
   DEBUG = False
-  DATABASE_URL = 'postgresql://{username}:{password}@localhost:5432/test_python_quiz'.format(
+  DATABASE_URL = 'postgresql://{username}:{password}@localhost:5432/python_quiz'.format(
     username=os.environ.get('DATABASE_USERNAME'), password=os.environ.get('DATABASE_PASSWORD'))
   SQLALCHEMY_DATABASE_URI = DATABASE_URL
 
