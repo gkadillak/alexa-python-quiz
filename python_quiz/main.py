@@ -44,6 +44,12 @@ def _answer_question(guess):
 def stop_quiz():
   return statement('Thanks for playing Python Quiz. Goodbye!')
 
+# legal nonsense
 @flask_app.route('/terms')
 def terms():
   return render_template('terms.html')
+
+@flask_app.route('/policy')
+def privacy_policy():
+  """Generated free from shopify"""
+  return render_template('privacy_policy.html')
