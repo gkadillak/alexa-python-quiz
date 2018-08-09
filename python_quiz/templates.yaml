@@ -33,3 +33,8 @@ incorrect_with_next_question: |
   <speak>
     I'm sorry, that's incorrect. Here's the next question: {{ question }}? Is it one, {{ option_one }}, two {{ option_two }}, three {{ option_three }} or four {{ option_four }}?
   </speak>
+
+help: |
+  <speak>
+    To play Python Quiz, make sure to respond in the form "The answer is" followed by the answer number. To repeat a question, just say "Alexa, repeat the last question". Would you like to hear the next question?
+  </speak>
