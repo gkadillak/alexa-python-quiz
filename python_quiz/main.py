@@ -39,7 +39,6 @@ def _answer_question(guess):
   elif response_type == constants.game_pb.ResponseType.STATEMENT:
     return statement(response)
 
-
 @ask.intent('AMAZON.StopIntent')
 def stop_quiz():
   return statement('Thanks for playing Python Quiz. Goodbye!')
@@ -47,11 +46,8 @@ def stop_quiz():
 @ask.intent('AMAZON.HelpIntent')
 def help():
   """Tell the user how the game works"""
-  help_text = """
-    To play Python Quiz, make sure to respond in the form "The answer is" followed by the answer number.
-    To repeat a question, just say "Alexa, repeat the last question". Would you like to hear the next question?
-    """
-  return statement(help_text)
+  help_text = render_template(template_name='help')
+  return question(help_text)
 
 # legal nonsense
 @flask_app.route('/terms')
