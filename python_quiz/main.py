@@ -46,7 +46,7 @@ def stop_quiz():
 @ask.intent('AMAZON.HelpIntent')
 def help():
   """Tell the user how the game works"""
-  help_text = render_template(template_name='help')
+  help_text = render_template('help')
   return question(help_text)
 
 # legal nonsense

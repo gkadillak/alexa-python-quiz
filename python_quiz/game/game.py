@@ -2,7 +2,7 @@ import logging
 import random
 from textwrap import wrap
 
-from sqlalchemy import func, desc
+from sqlalchemy import desc
 from flask import render_template
 
 from python_quiz.game import models
