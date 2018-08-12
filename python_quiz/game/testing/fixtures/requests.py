@@ -38,7 +38,7 @@ incorrect_guess_type_body = {
       "slots": {
         "Answer": {
           "name": "Answer",
-          "value": "banana",
+          "value": None,
           "confirmationStatus": "NONE"
         }
       }
