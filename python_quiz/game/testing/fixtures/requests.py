@@ -28,6 +28,35 @@ guess_body = {
   },
   "version": "1.0"
 }
+
+incorrect_guess_type_body = {
+  "request": {
+    "type": "IntentRequest",
+    "intent": {
+      "name": "QuizAnswerIntent",
+      "confirmationStatus": "NONE",
+      "slots": {
+        "Answer": {
+          "name": "Answer",
+          "value": "banana",
+          "confirmationStatus": "NONE"
+        }
+      }
+    },
+  },
+  "session": {
+    "application": {
+      "applicationId": "amzn1.ask.skill"
+    },
+    "new": False,
+    "sessionId": SESSION_ID,
+    "user": {
+      "userId": "amzn1.ask.account"
+    }
+  },
+  "version": "1.0"
+}
+
 start_game_body = {
 	"version": "1.0",
 	"session": {

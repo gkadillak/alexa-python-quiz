@@ -145,3 +145,25 @@ class IntegrationTest(test_foundation.TestFoundation):
 
     self.test_app.post('/python_quiz', data=json.dumps(requests.guess_body))
     self.test_app.post('/python_quiz', data=json.dumps(requests.guess_body))
+
+  def test_bad_answer_slot_type(self):
+    """Test that if a user doesn't respond with the wrong slot type, we tell them that and keep the game going"""
+    with sessions.active_session() as session:
+      session.add_all([
+        models.Question(body='what', option_one='1', option_two='2', option_three='3', option_four='4', answer='1')
+      ])
+      session.add_all([
+        models.Question(body='what', option_one='1', option_two='2', option_three='3', option_four='4', answer='1')
+      ])
+
+    game.create_game(num_questions=2, session_id=requests.SESSION_ID, user_id=requests.USER_ID)
+    with mock.patch("python_quiz.main.game.create_game"):
+      self.test_app.post('/python_quiz', data=json.dumps(requests.start_game_body))
+
+    response_json = self.test_app.post('/python_quiz', data=json.dumps(requests.incorrect_guess_type_body))
+    response = json.loads(response_json.data)
+    voice_response = response['response']['outputSpeech']['ssml']
+
+    assert '1.' not in voice_response, 'The response for help should not include a question'
+
+    assert response['response']['shouldEndSession'] == False, "The response should be a question"

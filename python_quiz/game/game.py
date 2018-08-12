@@ -2,7 +2,7 @@ import logging
 import random
 from textwrap import wrap
 
-from sqlalchemy import func, desc
+from sqlalchemy import desc
 from flask import render_template
 
 from python_quiz.game import models
@@ -70,8 +70,19 @@ def respond_game_summary(session_id):
     game = models.Game.with_session(session).filter(models.Game.session_id == session_id).first()
     return render_template('game_end', number_correct=game.count_correct, total=game.count)
 
+def correct_answer_type(guess):
+  try:
+    bool(int(guess))
+  except ValueError:
+    return False
 
 def respond_to_guess(session_id, guess):
+
+  # is there a better way to do this with flask-ask?
+  if not correct_answer_type(guess):
+    question_help = render_template('incorrect_type')
+    return question_help, game_pb.ResponseType.QUESTION
+
   is_correct = answer_current_question(session_id, guess)
   has_another_question = has_next_question(session_id)
 

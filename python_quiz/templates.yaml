@@ -38,3 +38,9 @@ help: |
   <speak>
     To play Python Quiz, make sure to respond in the form "The answer is" followed by the answer number. To repeat a question, just say "Alexa, repeat the last question". Would you like to hear the next question?
   </speak>
+
+
+incorrect_type: |
+  <speak>
+    I'm sorry, I didn't understand that guess. To guess the answer to a question, make sure to respond in the form "The answer is" followed by the answer number. What is your new guess?
+  </speak>
