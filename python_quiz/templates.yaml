@@ -5,7 +5,7 @@ ask_question: |
 
 game_end: |
   <speak>
-    The quiz has ended! You got {{ number_correct }} out of {{ total }}
+    The quiz has ended! You got {{ number_correct }} correct out of {{ total }}
   </speak>
 
 correct_with_next_question: |
@@ -15,23 +15,18 @@ correct_with_next_question: |
 
 correct_with_no_next_question: |
   <speak>
-    Correct! That was the last question. You've answered {{ count_correct }} out of {{ count_total }}.
-  </speak>
-
-incorrect_answer_with_next_question: |
-  <speak>
-    I'm sorry, that's incorrect. Here's the next question: {{ question }}? Is it one, {{ option_one }}, two {{ option_two }}, three {{ option_three }} or four {{ option_four }}?
+    Correct! That was the last question. You've answered {{ count_correct }} correct out of {{ count_total }}.
   </speak>
 
 incorrect_with_no_next_question: |
   <speak>
-    I'm sorry, that's incorrect. That was the last question.
+    I'm sorry, that's incorrect. The correct answer is {{ correct_answer }}. That was the last question.
     You've answered {{ count_correct }} correct out of {{ count_total }}.
   </speak>
 
 incorrect_with_next_question: |
   <speak>
-    I'm sorry, that's incorrect. Here's the next question: {{ question }}? Is it one, {{ option_one }}, two {{ option_two }}, three {{ option_three }} or four {{ option_four }}?
+    I'm sorry, that's incorrect. The correct answer is {{ correct_answer }}. Here's the next question: {{ question }}? Is it one, {{ option_one }}, two {{ option_two }}, three {{ option_three }} or four {{ option_four }}?
   </speak>
 
 help: |
