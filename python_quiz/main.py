@@ -39,20 +39,33 @@ def _answer_question(guess):
   elif response_type == constants.game_pb.ResponseType.STATEMENT:
     return statement(response)
 
+
 @ask.intent('AMAZON.StopIntent')
 def stop_quiz():
   return statement('Thanks for playing Python Quiz. Goodbye!')
 
+
 @ask.intent('AMAZON.HelpIntent')
-def help():
+def helper():
   """Tell the user how the game works"""
   help_text = render_template('help')
   return question(help_text)
+
+
+@ask.intent('AMAZON.HelpIntent')
+def repeat_question():
+  """Repeat the last question for the user"""
+  session_id = session.get('sessionId')
+  user_id = session['user']['userId']
+  rendered_question, question_id = game.ask_current_question(template_name='ask_question', session_id=session_id, user_id=user_id)
+  title, content = game.display_card(question_id)
+  return question(rendered_question).simple_card(title=title, content=content)
 
 # legal nonsense
 @flask_app.route('/terms')
 def terms():
   return render_template('terms.html')
+
 
 @flask_app.route('/policy')
 def privacy_policy():
