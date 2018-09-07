@@ -120,7 +120,7 @@ class GameTests(test_foundation.TestFoundation):
 
     # since the questions a person can be asked are unique, there should not be another question
     # to ask the user, therefore there should not be another question
-    assert game.has_next_question(session_id='456') == False
+    assert game.has_next_question(session_id='456') is False
 
 
 class IntegrationTest(test_foundation.TestFoundation):
@@ -167,3 +167,51 @@ class IntegrationTest(test_foundation.TestFoundation):
     assert '1.' not in voice_response, 'The response for help should not include a question'
 
     assert response['response']['shouldEndSession'] == False, "The response should be a question"
+    with sessions.active_session(should_commit=True) as session:
+      session.add_all([
+        models.Question(body='what', option_one='1', option_two='2', option_three='3', option_four='4', answer='1')
+      ])
+      session.add_all([
+        models.Question(body='what', option_one='1', option_two='2', option_three='3', option_four='4', answer='1')
+      ])
+
+    game.create_game(num_questions=2, session_id=requests.SESSION_ID, user_id=requests.USER_ID)
+    with mock.patch("python_quiz.main.game.create_game"):
+      self.test_app.post('/python_quiz', data=json.dumps(requests.start_game_body))
+
+    self.test_app.post('/python_quiz', data=json.dumps(requests.correct_guess_body))
+    self.test_app.post('/python_quiz', data=json.dumps(requests.correct_guess_body))
+
+  def test_incorrect_with_no_next_question_response_contains_answer(self):
+    """Test that if you are on the last question, we should tell you the correct answer in the response"""
+    with sessions.active_session(should_commit=True) as session:
+      session.add_all([
+        models.Question(body='what', option_one='1', option_two='2', option_three='3', option_four='4', answer='1')
+      ])
+
+    game.create_game(num_questions=1, session_id=requests.SESSION_ID, user_id=requests.USER_ID)
+    with mock.patch("python_quiz.main.game.create_game"):
+      self.test_app.post('/python_quiz', data=json.dumps(requests.start_game_body))
+
+    response = self.test_app.post('/python_quiz', data=json.dumps(requests.incorrect_guess_body))
+    response_json = json.loads(response.data)
+    assert 'The correct answer is 1' in response_json['response']['outputSpeech']['ssml']
+
+  def test_incorrect_with_next_question_response_contains_answer(self):
+    """Test that if you are not on the last question, we should tell you the correct answer in the response"""
+    with sessions.active_session(should_commit=True) as session:
+      session.add_all([
+        models.Question(body='what', option_one='1', option_two='2', option_three='3', option_four='4', answer='1')
+      ])
+      session.add_all([
+        models.Question(body='what', option_one='1', option_two='2', option_three='3', option_four='4', answer='1')
+      ])
+
+    game.create_game(num_questions=2, session_id=requests.SESSION_ID, user_id=requests.USER_ID)
+    with mock.patch("python_quiz.main.game.create_game"):
+      self.test_app.post('/python_quiz', data=json.dumps(requests.start_game_body))
+
+    self.test_app.post('/python_quiz', data=json.dumps(requests.incorrect_guess_body))
+    response = self.test_app.post('/python_quiz', data=json.dumps(requests.incorrect_guess_body))
+    response_json = json.loads(response.data)
+    assert 'The correct answer is 1' in response_json['response']['outputSpeech']['ssml']
