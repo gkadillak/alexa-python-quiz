@@ -20,7 +20,6 @@ class TestFoundation(unittest.TestCase):
       db.drop_all()
       db.create_all()
 
-
   def tearDown(self):
     """
     Close all connections that the app knows about and wipe the entire database
