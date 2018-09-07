@@ -52,7 +52,7 @@ def helper():
   return question(help_text)
 
 
-@ask.intent('AMAZON.HelpIntent')
+@ask.intent('AMAZON.RepeatIntent')
 def repeat_question():
   """Repeat the last question for the user"""
   session_id = session.get('sessionId')
