@@ -12,10 +12,11 @@ from python_quiz.tools import sessions
 logger = logging.getLogger(__name__)
 
 
-def ask_current_question(template_name, session_id, user_id):
+def ask_current_question(template_name, session_id, user_id, correct_answer=None):
   current_question = _query_current_question(session_id, user_id)
   return render_template(template_name,
                          question=current_question.body,
+                         correct_answer=correct_answer,
                          option_one=current_question.option_one,
                          option_two=current_question.option_two,
                          option_three=current_question.option_three,
@@ -26,9 +27,11 @@ def _query_current_question(session_id, user_id):
   with sessions.active_session(should_commit=False) as session:
     get_or_create_user(user_id, session)
     game = session.query(models.Game).filter(models.Game.session_id == session_id).first()
-    current_question = session.query(models.Question).get(game.question_ids.pop())
-    logger.info('game=%s question=%s', game.id, current_question.body)
-    return current_question
+    if game.question_ids:
+      current_question = session.query(models.Question).get(game.question_ids[-1])
+      logger.info('game=%s question=%s', game.id, current_question.body)
+      return current_question
+    return None
 
 
 def display_card(question_id):
@@ -80,9 +83,6 @@ def respond_to_guess(session_id, guess):
     question_help = render_template('incorrect_type')
     return question_help, game_pb.ResponseType.QUESTION
 
-  is_correct = answer_current_question(session_id, guess)
-  has_another_question = has_next_question(session_id)
-
   session = sessions.create_session()
   game = session.query(models.Game).filter(models.Game.session_id == session_id).first()
   session.close()
@@ -102,11 +102,11 @@ def respond_to_guess(session_id, guess):
 
   # if the answer is correct and there is no next question, return the game summary
   elif is_correct and not has_another_question:
-    return render_template('correct_with_no_next_question', count_correct=game.count_correct, count_total=game.count), game_pb.ResponseType.STATEMENT
+    return render_template('correct_with_no_next_question', count_correct=game.count_correct, count_total=game.count, correct_answer=previous_question.answer), game_pb.ResponseType.STATEMENT
 
   # if the answer is incorrect, and there is a next question, ask it!
   elif not is_correct and has_another_question:
-    next_question_response = ask_current_question(template_name='incorrect_with_next_question', session_id=session_id, user_id=game.user_id)
+    next_question_response = ask_current_question(template_name='incorrect_with_next_question', session_id=session_id, user_id=game.user_id, correct_answer=previous_question.answer)
     if isinstance(next_question_response, tuple):
       next_question_response = next_question_response[0]
     return next_question_response, game_pb.ResponseType.QUESTION
@@ -184,6 +184,7 @@ def answer_current_question(session_id, guess):
     session.add(current_game)
     session.commit()
     return is_correct
+
 
 def has_next_question(session_id):
   """Whether there is still a question that has not been asked yet"""
