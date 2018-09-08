@@ -143,8 +143,8 @@ class IntegrationTest(test_foundation.TestFoundation):
     with mock.patch("python_quiz.main.game.create_game"):
       self.test_app.post('/python_quiz', data=json.dumps(requests.start_game_body))
 
-    self.test_app.post('/python_quiz', data=json.dumps(requests.guess_body))
-    self.test_app.post('/python_quiz', data=json.dumps(requests.guess_body))
+    self.test_app.post('/python_quiz', data=json.dumps(requests.correct_guess_body))
+    self.test_app.post('/python_quiz', data=json.dumps(requests.correct_guess_body))
 
   def test_bad_answer_slot_type(self):
     """Test that if a user doesn't respond with the wrong slot type, we tell them that and keep the game going"""
@@ -201,17 +201,21 @@ class IntegrationTest(test_foundation.TestFoundation):
     """Test that if you are not on the last question, we should tell you the correct answer in the response"""
     with sessions.active_session(should_commit=True) as session:
       session.add_all([
-        models.Question(body='what', option_one='1', option_two='2', option_three='3', option_four='4', answer='1')
-      ])
-      session.add_all([
-        models.Question(body='what', option_one='1', option_two='2', option_three='3', option_four='4', answer='1')
+        models.Question(body='one', option_one='1', option_two='2', option_three='3', option_four='4', answer='1'),
+        models.Question(body='two', option_one='1', option_two='2', option_three='3', option_four='4', answer='2'),
+        models.Question(body='three', option_one='1', option_two='2', option_three='3', option_four='4', answer='3'),
       ])
 
-    game.create_game(num_questions=2, session_id=requests.SESSION_ID, user_id=requests.USER_ID)
+    game_id = game.create_game(num_questions=3, session_id=requests.SESSION_ID, user_id=requests.USER_ID)
     with mock.patch("python_quiz.main.game.create_game"):
       self.test_app.post('/python_quiz', data=json.dumps(requests.start_game_body))
 
     self.test_app.post('/python_quiz', data=json.dumps(requests.incorrect_guess_body))
     response = self.test_app.post('/python_quiz', data=json.dumps(requests.incorrect_guess_body))
     response_json = json.loads(response.data)
-    assert 'The correct answer is 1' in response_json['response']['outputSpeech']['ssml']
+
+    with sessions.active_session():
+      current_game = models.Game.query.get(game_id)
+      question_id = current_game.question_ids_snapshot[1]
+      question = models.Question.query.get(question_id)
+      assert 'The correct answer is %s' % question.answer in response_json['response']['outputSpeech']['ssml']

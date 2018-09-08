@@ -13,7 +13,8 @@ class MutableList(Mutable, list):
   def extend(self, value):
     list.extend(self, value)
     self.changed()
-  def pop(self, index=0):
+
+  def pop(self, index=-1):
     value = list.pop(self, index)
     self.changed()
     return value
