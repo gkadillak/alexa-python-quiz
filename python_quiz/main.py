@@ -45,6 +45,11 @@ def stop_quiz():
   return statement('Thanks for playing Python Quiz. Goodbye!')
 
 
+@ask.intent('AMAZON.NoIntent')
+def no_means_no():
+  return statement('Thanks for playing Python Quiz. Goodbye!')
+
+
 @ask.intent('AMAZON.HelpIntent')
 def helper():
   """Tell the user how the game works"""
