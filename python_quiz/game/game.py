@@ -27,11 +27,9 @@ def _query_current_question(session_id, user_id):
   with sessions.active_session(should_commit=False) as session:
     get_or_create_user(user_id, session)
     game = session.query(models.Game).filter(models.Game.session_id == session_id).first()
-    if game.question_ids:
-      current_question = session.query(models.Question).get(game.question_ids[-1])
-      logger.info('game=%s question=%s', game.id, current_question.body)
-      return current_question
-    return None
+    current_question = session.query(models.Question).get(game.question_ids[-1])
+    logger.info('game=%s question=%s', game.id, current_question.body)
+    return current_question
 
 
 def display_card(question_id):
