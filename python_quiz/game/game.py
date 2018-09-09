@@ -78,7 +78,7 @@ def respond_to_guess(session_id, guess):
 
   try:
     guess = int(guess)
-  except ValueError:
+  except (ValueError, TypeError):
     # the user didn't respond with a number, so tell them how the game works
     question_help = render_template('incorrect_type')
     return question_help, game_pb.ResponseType.QUESTION
