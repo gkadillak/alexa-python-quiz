@@ -1,6 +1,0 @@
-Which of the follow is not an implementation of python, IronPython, PyPy, Jython, or Jetpy, 4
-All built-in, non-system-exiting exceptions are derived from which class, Exception, BaseException, ArithmeticError, BufferError, 1
-When raising (or re-raising) an exception in an except or finally clause __context__ is automatically set to which context, the global context, the module's context, the last exception caught, you are able to set the context, 3
-What year was the first release of Python, 1992, 1987, 1995, 1991, 4
-Which of the following are is a kind of date and time object, naive, self-aware, unaware, relative, 1
-In the time module what does epoch mean, the first day of the year, the last day of the year, the point where time is considered to start
