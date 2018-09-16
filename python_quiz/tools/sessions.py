@@ -22,6 +22,7 @@ def create_session():
   Session = sessionmaker(bind=engine)
   return Session()
 
+
 @contextmanager
 def active_session(should_commit=True):
   """
