@@ -1,7 +1,7 @@
 # add the python_quiz package for imports later
 import os
 import sys
-quiz_game_path = os.path.abspath('../quiz_game')
+quiz_game_path = os.path.abspath('../alexa-python-quiz')
 sys.path.append(quiz_game_path)
 
 import argparse
