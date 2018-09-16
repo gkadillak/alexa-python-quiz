@@ -102,18 +102,18 @@ def respond_to_guess(session_id, guess):
 
   # if the answer is correct and there is no next question, return the game summary
   elif is_correct and not has_another_question:
-    return render_template('correct_with_no_next_question', count_correct=game.count_correct, count_total=game.count, correct_answer=previous_question.answer), game_pb.ResponseType.STATEMENT
+    return render_template('correct_with_no_next_question', count_correct=game.count_correct, count_total=game.count, correct_answer=previous_question.answer_body), game_pb.ResponseType.STATEMENT
 
   # if the answer is incorrect, and there is a next question, ask it!
   elif not is_correct and has_another_question:
-    next_question_response = ask_current_question(template_name='incorrect_with_next_question', session_id=session_id, user_id=game.user_id, correct_answer=previous_question.answer)
+    next_question_response = ask_current_question(template_name='incorrect_with_next_question', session_id=session_id, user_id=game.user_id, correct_answer=previous_question.answer_body)
     if isinstance(next_question_response, tuple):
       next_question_response = next_question_response[0]
     return next_question_response, game_pb.ResponseType.QUESTION
 
   # if the answer is incorrect, and there is no next question, return the game summary
   elif not is_correct and not has_another_question:
-    return render_template('incorrect_with_no_next_question', count_correct=game.count_correct, correct_answer=previous_question.answer, count_total=game.count), game_pb.ResponseType.STATEMENT
+    return render_template('incorrect_with_no_next_question', count_correct=game.count_correct, correct_answer=previous_question.answer_body, count_total=game.count), game_pb.ResponseType.STATEMENT
 
 
 def create_game(num_questions, session_id, user_id):
