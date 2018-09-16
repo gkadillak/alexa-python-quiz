@@ -186,7 +186,7 @@ class IntegrationTest(test_foundation.TestFoundation):
     """Test that if you are on the last question, we should tell you the correct answer in the response"""
     with sessions.active_session(should_commit=True) as session:
       session.add_all([
-        models.Question(body='what', option_one='1', option_two='2', option_three='3', option_four='4', answer='1')
+        models.Question(body='what', option_one='one', option_two='two', option_three='three', option_four='four', answer='1')
       ])
 
     game.create_game(num_questions=1, session_id=requests.SESSION_ID, user_id=requests.USER_ID)
@@ -195,7 +195,7 @@ class IntegrationTest(test_foundation.TestFoundation):
 
     response = self.test_app.post('/python_quiz', data=json.dumps(requests.incorrect_guess_body))
     response_json = json.loads(response.data)
-    assert 'The correct answer is 1' in response_json['response']['outputSpeech']['ssml']
+    assert 'The correct answer is one' in response_json['response']['outputSpeech']['ssml']
 
   def test_incorrect_with_next_question_response_contains_answer(self):
     """Test that if you are not on the last question, we should tell you the correct answer in the response"""
