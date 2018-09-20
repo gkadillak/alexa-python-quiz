@@ -1,5 +1,6 @@
 import logging
 import random
+
 from textwrap import wrap
 
 from sqlalchemy import desc

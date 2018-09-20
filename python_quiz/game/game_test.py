@@ -123,7 +123,7 @@ class GameTests(test_foundation.TestFoundation):
     assert game.has_next_question(session_id='456') is False
 
 
-class IntegrationTest(test_foundation.TestFoundation):
+class IntegrationTests(test_foundation.TestFoundation):
 
   def setUp(self):
     super().setUp()
@@ -139,12 +139,12 @@ class IntegrationTest(test_foundation.TestFoundation):
         models.Question(body='what', option_one='1', option_two='2', option_three='3', option_four='4', answer='1')
       ])
 
-    game.create_game(num_questions=2, session_id=requests.SESSION_ID, user_id=requests.USER_ID)
-    with mock.patch("python_quiz.main.game.create_game"):
-      self.test_app.post('/python_quiz', data=json.dumps(requests.start_game_body))
+      game.create_game(num_questions=2, session_id=requests.SESSION_ID, user_id=requests.USER_ID)
+      with mock.patch("python_quiz.main.game.create_game"):
+        self.test_app.post('/python_quiz', data=json.dumps(requests.start_game_body))
 
-    self.test_app.post('/python_quiz', data=json.dumps(requests.correct_guess_body))
-    self.test_app.post('/python_quiz', data=json.dumps(requests.correct_guess_body))
+      self.test_app.post('/python_quiz', data=json.dumps(requests.correct_guess_body))
+
 
   def test_bad_answer_slot_type(self):
     """Test that if a user doesn't respond with the wrong slot type, we tell them that and keep the game going"""

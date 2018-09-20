@@ -15,10 +15,13 @@ def create_session():
 
   @rtype: sqlalchemy.orm.session.Session
   """
-  if 'TESTING_DATABASE_URL' in os.environ:
-    engine = create_engine(os.environ['TESTING_DATABASE_URL'])
-  else:
-    engine = create_engine(os.environ['DATABASE_URL'])
+  testing_database_url = os.environ.get('TESTING_DATABASE_URL')
+  production_database_url = os.environ.get('DATABASE_URL')
+  if not testing_database_url and not production_database_url:
+    raise ValueError("Cannot create a session without a database url!")
+
+
+  engine = create_engine(testing_database_url if testing_database_url else production_database_url)
   Session = sessionmaker(bind=engine)
   return Session()
 
