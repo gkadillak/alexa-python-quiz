@@ -123,7 +123,7 @@ class GameTests(test_foundation.TestFoundation):
     assert game.has_next_question(session_id='456') is False
 
 
-class IntegrationTest(test_foundation.TestFoundation):
+class IntegrationTests(test_foundation.TestFoundation):
 
   def setUp(self):
     super().setUp()
@@ -144,7 +144,10 @@ class IntegrationTest(test_foundation.TestFoundation):
       self.test_app.post('/python_quiz', data=json.dumps(requests.start_game_body))
 
     self.test_app.post('/python_quiz', data=json.dumps(requests.correct_guess_body))
-    self.test_app.post('/python_quiz', data=json.dumps(requests.correct_guess_body))
+    response = self.test_app.post('/python_quiz', data=json.dumps(requests.correct_guess_body))
+    end_of_game_response = json.loads(response.data)
+    voice_response = end_of_game_response['response']['outputSpeech']['ssml']
+    assert "You've answered 2 correct out of 2" in voice_response, "Expected summary to say all questions correct"
 
   def test_bad_answer_slot_type(self):
     """Test that if a user doesn't respond with the wrong slot type, we tell them that and keep the game going"""
@@ -166,7 +169,7 @@ class IntegrationTest(test_foundation.TestFoundation):
 
     assert '1.' not in voice_response, 'The response for help should not include a question'
 
-    assert response['response']['shouldEndSession'] == False, "The response should be a question"
+    assert response['response']['shouldEndSession'] is False, "The response should be a question"
     with sessions.active_session(should_commit=True) as session:
       session.add_all([
         models.Question(body='what', option_one='1', option_two='2', option_three='3', option_four='4', answer='1')

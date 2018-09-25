@@ -5,6 +5,7 @@ venv/
 .cache/
 .pytest_cache/
 .idea/
+.DS_Store
 bin/
 lib/
 pip-selfcheck.json
