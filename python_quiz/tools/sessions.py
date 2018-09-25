@@ -20,7 +20,6 @@ def create_session():
   if not testing_database_url and not production_database_url:
     raise ValueError("Cannot create a session without a database url!")
 
-
   engine = create_engine(testing_database_url if testing_database_url else production_database_url)
   Session = sessionmaker(bind=engine)
   return Session()

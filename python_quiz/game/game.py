@@ -84,16 +84,16 @@ def respond_to_guess(session_id, guess):
     question_help = render_template('incorrect_type')
     return question_help, game_pb.ResponseType.QUESTION
 
-  session = sessions.create_session()
-  game = session.query(models.Game).filter(models.Game.session_id == session_id).first()
-  session.close()
+  game = query_for_current_game(session_id)
 
   previous_question = _query_current_question(session_id, game.user_id)
 
   is_correct = answer_current_question(session_id, guess)
   has_another_question = has_next_question(session_id)
 
-  # if the answer is correct, tell the user, and there is a next question, ask it!
+  game = query_for_current_game(session_id)
+
+  # if the answer is correct, tell the user, and if there is a next question, ask it!
   if is_correct and has_another_question:
     next_question_response = ask_current_question(template_name='correct_with_next_question', session_id=session_id, user_id=game.user_id)
     if isinstance(next_question_response, tuple):
@@ -115,6 +115,13 @@ def respond_to_guess(session_id, guess):
   # if the answer is incorrect, and there is no next question, return the game summary
   elif not is_correct and not has_another_question:
     return render_template('incorrect_with_no_next_question', count_correct=game.count_correct, correct_answer=previous_question.answer_body, count_total=game.count), game_pb.ResponseType.STATEMENT
+
+
+def query_for_current_game(session_id):
+  session = sessions.create_session()
+  game = session.query(models.Game).filter(models.Game.session_id == session_id).first()
+  session.close()
+  return game
 
 
 def create_game(num_questions, session_id, user_id):
@@ -169,7 +176,7 @@ def answer_current_question(session_id, guess):
 
   @rtype: True if the guess is correct
   """
-  with sessions.active_session(should_commit=False) as session:
+  with sessions.active_session(should_commit=True) as session:
     current_game = session.query(models.Game)\
       .filter(models.Game.session_id == session_id).order_by(desc(models.Game.created)).first()
     question_id = current_game.question_ids.pop()
@@ -183,7 +190,6 @@ def answer_current_question(session_id, guess):
       current_game.count_incorrect += 1
 
     session.add(current_game)
-    session.commit()
     return is_correct
 
 
