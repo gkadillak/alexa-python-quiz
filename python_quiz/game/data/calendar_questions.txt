@@ -1,0 +1,7 @@
+By default, what does the calendar module set as the default first day of the week:Sunday:Monday:Tuesday:Wednesday:2
+By default, what does the calendar module set as the default last day of the week:Friday:Saturday:Sunday:Monday:3
+In the calendar module, what method do you use to set the first day of the week to another weekday:update first day: update primary day: set default day: set first weekday:4
+In the calendar module, what is year -1 considered in BC: -1:0:1:2:4
+What does the class Calendar do in the calendar module: Creates a Calendar object:Generates a plaintext calendar:Generates an HTML calendar:nothing:1
+What does the class TextCalendar do in the calendar module: Creates a Calendar object:Generates a plaintext calendar:Generates an HTML calendar:nothing:2
+What does the class HTMLCalendar do in the calendar module: Creates a Calendar object:Generates a plaintext calendar:Generates an HTML calendar:nothing:3

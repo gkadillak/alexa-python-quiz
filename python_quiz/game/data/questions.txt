@@ -1,0 +1,30 @@
+which of the following is true for an iterable, all python objects can be an iterable,an object is considered an iterable if you can get an iterator for it,an iterable must be infinite,you can always go backwards in an iterable,2
+what are generator expressions surrounded by,parentheses,brackets,curly braces,it depends,1
+what is the recommended tool for using virtual environments as of python three dot five,pyvenv,virtualenv,no change,venv,4
+how do you access the script name and additional arguments,use star args,import sys and use sys.argv,they are accessible on the global scope with just argv,they are not accessible,2
+when no script and no arguments are given what is the value of sys argv of zero, empty string, empty list, empty dictionary, zero, 1
+what does tty short for, time to yell, ternary test yield, teletype, it is not an abbreviation, 3
+what is a tty, terminal, testing procedure, kind of python class, monitor, 1
+how do you invoke interactive mode with python, type python interactive in a terminal and press enter,write a bash script,you cannot run python in an interactive mode,type python three in a terminal and press enter, 3
+by default python source files are treated as encoded in, latin one, ascii, utf sixteen, utf eight, 4
+how do you change the default encoding for a python file, special comment, change environmental variable, rebuild python, you cannot change the default encoding, 1
+what line number should the change for the default encoding be placed, second, bottom of file, first, line number doesn't matter, 3
+what is the one exception to the first line rule for changing the default encoding, when the code is run in a special environment, when you enable unsafe mode for python, when the source code starts with a unix shebang line, there is no exception to the rule, 3
+comments in python start with a, double slash, period, hash character, dash, 3
+what kind of number does division in python always return, int, float, long, complex, 2
+how do you perform floor division and discard the remainder, use a single slash, use a double slash, use the percent symbol, it's in the math module, 2
+if a variable is not assigned a value what type of error does python raise, type error, value error, name error, base error, 3
+if mixing floating point and integer values what will the output number type be, integer, float, long, complex, 2
+in interactive mode what variable is the last printed expression assigned to, question mark, dash, underscore, period, 3
+how do you specify an imaginery number in python, use an i suffic, use a k suffix, use a j suffix, instantiate the number using the imaginary class, 3
+how do you prevent characters prefaced by a backslash to be treated as special characters, add an r before the first quote, add an n before the first quote, add a t before the first quote, add an s before the first quote, 1
+what do you use to break out of the innermost enclosing for or while loop, else, elif, break, stop, 3
+when is the else statement in a loop statement executed, at the start of the loop, if a break statement is reached, when a loop is terminated through exhaustion or when condition becomes false, it is never reached, 3
+what is the behavior of the continue statement, halts the loop, executes the else clause if it exists, skips the next iteration of the loop, continues with the next iteration of the loop, 4
+what does the pass statement do, passes execution to the secondary thread, passes execution to the parent, passes the current loop, nothing, 4
+what keyword do you use to define a function, def, func, function, routine, 1
+what is the first statement in a function body called, special comment, passive comment, docstring, information comment, 3
+what does the execution of a function introduce, another thread, a new global symbol table, a new local symbol table, a persistent memory access, 3
+how are arguments passed, call by value, call by reference, implicitly, explicitly but stored in the global symbol table, 1
+how many times is the default value for a function keyword argument, never, once, twice, three times, 2
+what container is used to store the keyword arguments of a function, list, tuple, dictionary, named tuple, 3
